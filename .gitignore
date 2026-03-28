@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+*.egg-info/
+
+# Environment
+.env
+
+# Database
+*.db
+
+# FAISS index (generated artefact — do not commit)
+faiss_index/
+
+# IDE
+.vscode/
+.idea/
+*.iml

@@ -1,0 +1,5 @@
+item,stock,reorder_threshold
+brownie,25,20
+coffee,50,30
+sandwich,10,15
+matcha,30,20

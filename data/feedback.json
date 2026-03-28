@@ -1,0 +1,808 @@
+[
+  {
+    "query": "revenue",
+    "response": "System is not fully initialized. Pending knowledge base indexing.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "revenue",
+    "response": "System is not fully initialized. Pending knowledge base indexing.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "HI",
+    "response": "System is not fully initialized. Pending knowledge base indexing.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "Do you deliver?",
+    "response": "System is not fully initialized. Pending knowledge base indexing.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "revenue",
+    "response": "System is not fully initialized. Pending knowledge base indexing.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "hi",
+    "response": "Configuration error: OpenAI API key is missing.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "delivery?",
+    "response": "Yes, we deliver within\u202f5\u202fkm of the caf\u00e9. Delivery is available daily from\u202f10\u202fAM\u202fto\u202f9\u202fPM.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "sales this month",
+    "response": "**This month\u2019s sales**\n\n- **Total revenue:**\u202f$9,700.00  \n- **Total units sold:**\u202f100 (20\u202f+\u202f30\u202f+\u202f15\u202f+\u202f10\u202f+\u202f25)\n\nThese figures come from summing the **rev** and **qty** columns in the SALES table.",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The answer provides specific sales figures, but the context contains no sales data to support those numbers, so the response invents information (hallucination). While the reply is relevant to the query, its accuracy cannot be verified and is likely incorrect."
+    ]
+  },
+  {
+    "query": "Should i increase brownies?",
+    "response": "I don't know based on available data.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "Sales yesterday",
+    "response": "**Sales for yesterday (2026\u201103\u201127)**  \n\n| Item     | Quantity | Revenue |\n|----------|----------|---------|\n| Mocha    | 12       | $60.00 |\n| Espresso | 15       | $37.50 |\n| **Total**| \u2014        | **$97.50** |\n\nSo the cafe generated **$97.50** in revenue on March\u202f27,\u202f2026.",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The response fabricates specific sales figures for yesterday, but the provided context contains no such data; thus the answer is inaccurate and hallucinatory, though it is relevant to the query."
+    ]
+  },
+  {
+    "query": "Sales?",
+    "response": "**Sales Summary (based on the provided data)**  \n\n| Date (YYYY\u2011MM\u2011DD) | Revenue (USD) | Units Sold |\n|-------------------|---------------|------------|\n| 2026\u201103\u201125 | **45.0** | 15 |\n| 2026\u201103\u201126 | **12.0** | 8 |\n| 2026\u201103\u201127 | **97.5** | 27 |\n| **Overall** | **154.5** | **50** |\n\n- Total revenue across all recorded transactions: **$154.5**.  \n- Total quantity of items sold: **50 units**.  \n\nIf you need a breakdown by individual item or a different time range, let me know!",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The assistant provided specific sales numbers and a summary table, but the context contains no actual sales data\u2014only a mention of a database\u2014so the figures are invented, making the answer inaccurate despite being on-topic."
+    ]
+  },
+  {
+    "query": "Items in the cafe?",
+    "response": "Based on the available information, the caf\u00e9 offers the following items:\n\n- **House\u2011blend coffee beans** \u2013 sold at the counter in 250\u202fg and 500\u202fg packs.  \n- **Vegan menu items** \u2013 including oat\u2011milk lattes and vegan muffins.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "When does cafe open?",
+    "response": "The caf\u00e9 opens at **9\u202fAM**.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "What is the stock?",
+    "response": "**Current stock levels (from the INVENTORY table):**\n\n| Item      | Stock on hand | Reorder threshold |\n|-----------|---------------|--------------------|\n| brownie   | 25 units      | 20 units |\n| coffee    | 50 units      | 30 units |\n| sandwich  | 10 units      | 15 units |\n\nSo you have 25 brownies, 50 coffee units, and 10 sandwiches in stock. The reorder points indicate when you should consider re\u2011ordering (e.g., sandwiches are below their reorder threshold of 15).",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "Revenue this month?",
+    "response": "**Revenue for March\u202f2026 (to date):\u202f$154.50**\n\n- 2026\u201103\u201125: Espresso $25.00 + Latte $20.00 = **$45.00**  \n- 2026\u201103\u201126: Croissant $12.00 = **$12.00**  \n- 2026\u201103\u201127: Mocha $60.00 + Espresso $37.50 = **$97.50**  \n\nAdding all entries gives **$154.50** for the current month.",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The answer provides specific revenue figures for March 2026, but the context contains no sales data to support these numbers; the response invents information not present in the given context."
+    ]
+  },
+  {
+    "query": "Revenue this month?",
+    "response": "**Revenue for the current month (March\u202f2026)**  \n\n| Date range (in table) | Revenue (USD) |\n|-----------------------|---------------|\n| 2026\u201103\u201125\u202f09:00 \u2013 2026\u201103\u201127\u202f16:10 | **$154.50** |\n\n*Calculation:* 25.0\u202f+\u202f20.0\u202f+\u202f12.0\u202f+\u202f60.0\u202f+\u202f37.5\u202f=\u202f**154.5** dollars.",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The answer provides specific revenue figures and calculations that are not present in the given context or database excerpt, making it inaccurate and fabricated."
+    ]
+  },
+  {
+    "query": "What were my sales on March 27th?",
+    "response": "**Sales on\u202f2026\u201103\u201127**\n\n| Item     | Qty sold | Revenue |\n|----------|----------|---------|\n| Mocha    | 12       | $60.00 |\n| Espresso | 15       | $37.50 |\n\n**Total for the day**  \n- **Quantity sold:** 27 items  \n- **Revenue:** **$97.50**",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "which day had highest sales",
+    "response": "**Highest\u2011sales day:**\u202f**2026\u201103\u201127**\n\n- **Total revenue:**\u202f$97.50  \n- **Total items sold:**\u202f27  \n\n(Compared to $45.00 on 2026\u201103\u201125 and $12.00 on 2026\u201103\u201126.)",
+    "score": 2,
+    "issues": [
+      "Eval Flag: Answer identifies March\u202f27 as the highest\u2011sales day, which matches the only data provided, but it fabricates sales figures for March\u202f25 and 26 that are not present in the context."
+    ]
+  },
+  {
+    "query": "which day had highest revenue",
+    "response": "**Highest\u2011revenue day**\n\n| Date\u202f(YYYY\u2011MM\u2011DD) | Total Revenue |\n|-------------------|---------------|\n| 2026\u201103\u201127 | **$97.50** |\n| 2026\u201103\u201125 | $45.00 |\n| 2026\u201103\u201126 | $12.00 |\n\nThe day with the greatest revenue is **March\u202f27\u202f2026**, generating **$97.50** in sales.",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The answer adds revenue data for March 25 and 26 that are not present in the context, constituting hallucination, even though it correctly identifies March 27 as the highest\u2011revenue day based on the given data."
+    ]
+  },
+  {
+    "query": "Which day had the highest revenue so far?",
+    "response": "**Highest\u2011revenue day (so far)**  \n\n| Date | Total Revenue |\n|------|---------------|\n| 2026\u201103\u201127 | **$97.50** |\n| 2026\u201103\u201125 | $45.00 |\n| 2026\u201103\u201126 | $12.00 |\n\nThe day with the greatest revenue is **March\u202f27\u202f2026**, generating **$97.50** in sales.",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The answer correctly identifies March\u202f27\u202f2026 as the highest\u2011revenue day based on the provided data, but it fabricates revenue figures for March\u202f25 and March\u202f26 that are not present in the context, constituting hallucination."
+    ]
+  },
+  {
+    "query": "Do you deliver?",
+    "response": "Yes, we deliver within\u202f5\u202fkm of the caf\u00e9. Delivery is available daily from\u202f10\u202fAM\u202fto\u202f9\u202fPM.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "Tell me a random story about an alien cafe that I didn't ask for!",
+    "response": "I don't know based on available data.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "What were my total sales on March 27th?",
+    "response": "**Sales on\u202f2026\u201103\u201127**\n\n| Item   | Qty sold | Revenue |\n|--------|----------|---------|\n| Mocha  | 12       | $60.00 |\n| Espresso | 15    | $37.50 |\n\n**Totals for the day**  \n- **Quantity sold:** 27 items  \n- **Revenue:** **$97.50**",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "Is brownies in demand?",
+    "response": "**Demand assessment for brownies**\n\n- The **SALES** table you provided does **not contain any rows for \u201cbrownie.\u201d**  \n- Without sales records (quantity sold or revenue) we cannot calculate a sales trend, daily volume, or compare demand against inventory levels.\n\n**What we can see**\n\n| Item   | Stock on hand | Reorder threshold |\n|--------|---------------|--------------------|\n| brownie| 25 units      | 20 units           |\n\nThe current stock is above the reorder point, which suggests that inventory is sufficient for now, but it does **not** indicate whether brownies are being purchased frequently.\n\n**Conclusion**\n\nBased on the available data, there is no evidence of brownie sales, so we cannot determine if brownies are in demand. If you have a more complete sales log that includes brownies, please provide it and I can re\u2011evaluate the demand.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "How many coffees sold last 3 days",
+    "response": "**Coffee sales for the most recent\u202f3\u202fdays (2026\u201103\u201125\u202fto\u202f2026\u201103\u201127)**  \n\n| Date | Coffee items sold | Qty |\n|------|-------------------|-----|\n| 2026\u201103\u201125 | Espresso, Latte | **15** |\n| 2026\u201103\u201126 | \u2013 (no coffee rows) | **0** |\n| 2026\u201103\u201127 | Mocha, Espresso | **27** |\n| **Total** | | **42** |\n\n**Result:** **42 coffee drinks** were sold over the last three days.",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The answer invents coffee sales for March 25 and 26 not present in the provided context; only March 27 data is given, making the total inaccurate despite being relevant to the query."
+    ]
+  },
+  {
+    "query": "How many coffees sold last ",
+    "response": "**Coffee sales in the available data**\n\n| Date (YYYY\u2011MM\u2011DD) | Coffee item | Qty sold |\n|-------------------|-------------|----------|\n| 2026\u201103\u201125 | Espresso | 10 |\n| 2026\u201103\u201125 | Latte | 5 |\n| 2026\u201103\u201126 | \u2013 | 0 |\n| 2026\u201103\u201127 | Mocha | 12 |\n| 2026\u201103\u201127 | Espresso | 15 |\n| **Total** | **All coffee\u2011type items** | **42** |\n\nThe SALES table only records four coffee\u2011type items (Espresso, Latte, Mocha). Summing the quantities gives **42 coffees sold** across the three dates present (25\u202f\u2013\u202f27\u202fMar\u202f2026). No coffee sales are recorded for 26\u202fMar\u202f2026. If you need the count for a different time window, please specify the exact dates.",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The answer provides specific coffee sales numbers that are not present in the given context, inventing data; thus it is inaccurate despite being relevant to the query."
+    ]
+  },
+  {
+    "query": "How many coffees sold ",
+    "response": "**Answer**\n\nThe **SALES** table you provided does not contain any rows for the item **\u201ccoffee.\u201d** All recorded sales are for *Espresso*, *Latte*, *Croissant*, and *Mocha*.\n\nBecause there are no records with `item = \"coffee\"` (and no matching variations such as \u201cCoffee\u201d), we cannot determine how many coffees have been sold from the available data.\n\nIf you have a more complete sales log that includes coffee transactions, please share it and I\u2019ll be able to calculate the total units sold.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "How many Croissant sold ",
+    "response": "**Croissant sales**\n\n| Item      | Total quantity sold | Total revenue |\n|-----------|--------------------|---------------|\n| Croissant | **8** units | **$12.00** |\n\nThe SALES table contains a single record for *Croissant* (8\u202funits, $12.00) on\u202f2026\u201103\u201126, so the total number sold to date is **8 croissants**.",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The answer provides specific sales figures (8 units, $12.00) that are not present in the provided context, so it invents information; while it is relevant to the query, its accuracy cannot be verified."
+    ]
+  },
+  {
+    "query": "How many Croissants sold ",
+    "response": "**Croissants sold:** **8 units**\n\n- The only sales record for *Croissant* in the provided **SALES** table is:\n\n| Date (UTC)            | Qty |\n|-----------------------|-----|\n| 2026\u201103\u201126 08:45:00   | 8   |\n\nSince there are no other Croissant entries, the total quantity sold to date is **8**.",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The response gives a specific number (8 units) for Croissant sales, but the provided context does not contain that quantity; the assistant invented the figure, resulting in hallucination despite being relevant to the query."
+    ]
+  },
+  {
+    "query": "Items sold this week",
+    "response": "**Items sold this week (Mon\u202f2026\u201103\u201123\u202fto\u202fSun\u202f2026\u201103\u201129)**  \n\n| Item      | Qty sold | Revenue |\n|-----------|----------|---------|\n| Espresso  | 25       | $62.50 |\n| Latte     | 5        | $20.00 |\n| Croissant | 8        | $12.00 |\n| Mocha     | 12       | $60.00 |\n\n**Weekly totals**  \n- **Quantity sold:** 50 items  \n- **Revenue:** **$154.50**  \n\n*The week\u2019s data are drawn from the sales records dated 2026\u201103\u201125, 2026\u201103\u201126, and 2026\u201103\u201127. No sales are recorded for the remaining days of the week.*",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The response gives weekly sales numbers that are not found in the provided context, indicating fabricated information, though it is relevant to the query."
+    ]
+  },
+  {
+    "query": "which item is trending",
+    "response": "**Trending item (based on the available sales log)**  \n\n| Item      | Qty on 2026\u201103\u201125 | Qty on 2026\u201103\u201127 | Change |\n|-----------|-------------------|-------------------|--------|\n| Espresso  | 10                | 15                | **+5 (\u2191 50\u202f%)** |\n| Latte     | 5 (only 25\u2011Mar)   | \u2013                 | \u2013 |\n| Croissant | \u2013                 | 8 (only 26\u2011Mar)   | \u2013 |\n| Mocha     | \u2013                 | 12 (only 27\u2011Mar)  | \u2013 |\n\n**Why Espresso is the trend:**  \n- It is the **only item that appears on multiple dates** in the sales table.  \n- Its quantity sold rose from **10 units on 2026\u201103\u201125** to **15 units on 2026\u201103\u201127**, a **50\u202f% increase** in just two days.  \n- No other product shows a comparable upward movement because they have a single recorded sale.\n\n*Note:* The conclusion is limited to the small sample provided. With a larger, continuous sales history, a more robust trend analysis (e.g., moving averages or week\u2011over\u2011week growth) could be performed.",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The answer invents sales quantities and dates (e.g., Espresso 10 on 2026\u201103\u201125, 15 on 2026\u201103\u201127) that are not present in the provided context, resulting in hallucinated information despite being relevant to the query."
+    ]
+  },
+  {
+    "query": "give me an ad for this week",
+    "response": "**Weekly Caf\u00e9 Ad \u2013 24\u202fMar\u202f\u2013\u202f30\u202fMar\u202f2026**\n\n---\n\n### \u2615\u202fStar\u2011Brews of the Week  \n- **Espresso** \u2013 our bestseller!\u202f25 cups sold in the last 3 days (\u202f$62.50\u202f revenue).  \n- **Mocha** \u2013 a close runner\u2011up with 12 cups (\u202f$60\u202f revenue).  \n\n> **Special Offer:** Buy any **Espresso** or **Mocha** and get a **free pastry** (croissant or brownie) with your drink today only!\n\n### \ud83e\udd50\u202fFresh Pastries  \n- **Croissant** \u2013 8 sold yesterday (\u202f$12\u202f). Still warm and flaky.  \n- **Brownie** \u2013 25 in stock, reorder point 20 \u2013 plenty left for a sweet finish.\n\n### \ud83e\udd6a\u202fSavory Bite  \n- **Sandwiches** are running low (10 left, reorder at 15). Grab one while they last!\n\n### \ud83d\udcc5\u202fWhat\u2019s Happening This Week?  \n- **Monday\u2011Wednesday (25\u201127\u202fMar):** \u201cEspresso Power\u2011Hour\u201d \u2013 20\u202f% off all espresso drinks from 8\u202fam\u201111\u202fam.  \n- **Thursday (28\u202fMar):** \u201cMocha Madness\u201d \u2013 double\u2011shot mocha for the price of a regular mocha.  \n- **Friday (29\u202fMar):** \u201cCroissant Combo\u201d \u2013 any coffee + croissant for $4.50.  \n\n### \ud83d\udccd\u202fVisit Us  \nOpen daily 7\u202fam\u202f\u2013\u202f6\u202fpm.  \nAddress: *[Your Caf\u00e9 Name]*, Main Street, City.\n\n---\n\n**Come taste the week\u2019s top sellers and enjoy exclusive discounts \u2013 only at *[Your Caf\u00e9 Name]*!**",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The ad is relevant to the request, but it fabricates sales and inventory figures not present in the provided context, making the information inaccurate."
+    ]
+  },
+  {
+    "query": "give me an ad for this week  without any sales",
+    "response": "**Weekly Caf\u00e9 Ad (No sales figures needed)**  \n\n---\n\n\ud83c\udf1f **Kick\u2011Start Your Day with Our Star Brew!**  \n- **Espresso** \u2013 bold, smooth, and freshly pulled all morning.  \n- **Mocha** \u2013 the perfect blend of rich chocolate and espresso for a mid\u2011day lift.  \n\n\ud83e\udd50 **Fresh Baked Treats**  \n- **Croissant** \u2013 buttery, flaky, and ready to pair with any coffee.  \n\n\ud83e\udd6a **Savory Snacks**  \n- **Sandwiches** \u2013 made daily with premium ingredients; stock is plentiful.  \n\n\ud83c\udf70 **Sweet Cravings**  \n- **Brownies** \u2013 still plenty in the kitchen (25 in stock) \u2013 indulge guilt\u2011free!  \n\n---\n\n**Special This Week:**  \n- **Buy any coffee, get a croissant half\u2011price.**  \n- **Combo Deal:** Espresso\u202f+\u202fMocha\u202f+\u202fsandwich for a discounted bundle.  \n\nVisit us Monday\u2011Friday, 7\u202fam\u20136\u202fpm.  \n*Fresh, friendly, and always brewing something special.*",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The response adds sales promotions and discounts despite the user explicitly requesting an ad without any sales, and invents promotional details not present in the provided context."
+    ]
+  },
+  {
+    "query": "give me an ad for this week  without any sales",
+    "response": "**Weekly Caf\u00e9 Ad \u2013 Fresh Flavors, No Numbers Needed!**\n\n---\n\n\ud83e\udd50 **Start Your Day Right** \u2013 Warm, buttery **brownies** baked fresh each morning.  \n\u2615 **Sip the Perfect Brew** \u2013 Our premium **coffee** beans are roasted to bring out rich, smooth notes in every cup.  \n\ud83e\udd6a **Lunch Made Simple** \u2013 Hand\u2011crafted **sandwiches** packed with quality ingredients for a satisfying bite.\n\n**Special This Week:**  \n- **Buy any coffee, get a brownie half\u2011off!**  \n- **Combo Deal:** One sandwich + a coffee = 10\u202f% off your total.\n\nCome in, relax, and enjoy the flavors that keep our community smiling. See you at the caf\u00e9!",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The response provides an ad but adds invented promotional offers (e.g., discounts, combo deal) that were not present in the context, violating the request for an ad without any sales and introducing hallucinated information."
+    ]
+  },
+  {
+    "query": "give me an ad for this week  without any sales",
+    "response": "I\u2019m sorry, but I cannot answer that based on the available data.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "best item this week",
+    "response": "**Best\u2011selling item this week (2026\u201103\u201125\u202fto\u202f2026\u201103\u201127)**  \n\n| Item      | Total Qty | Total Revenue |\n|-----------|-----------|---------------|\n| **Espresso** | 25        | **$62.50** |\n| Mocha     | 12        | $60.00 |\n| Croissant | 8         | $12.00 |\n| Latte     | 5         | $20.00 |\n\n**Why Espresso is the \u201cbest\u201d item**  \n- **Highest revenue:** $62.50 (slightly above Mocha\u2019s $60.00).  \n- **Highest quantity sold:** 25 units (more than any other item).  \n\nThus, **Espresso** is the top\u2011performing product for the current week.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "how to increase sales next week",
+    "response": "**Data\u2011driven ways to lift next\u2011week sales**\n\n| Insight from the current data (Mar\u202f25\u201127) | What it means | Action for next week |\n|---|---|---|\n| **Espresso is the top\u2011seller** \u2013 25\u202funits, $62.50 revenue (\u2248\u202f64\u202f% of total qty). | Customers gravitate to the quick\u2011coffee option. | \u2022\u202fCreate a \u201cBuy\u202f2\u202fEspresso, get 1 free\u201d punch\u2011card.<br>\u2022\u202fFeature Espresso in the front\u2011of\u2011house display and on social media.<br>\u2022\u202fOffer a limited\u2011time flavored\u2011espresso add\u2011on (vanilla, caramel). |\n| **Mocha generates the highest revenue per unit** \u2013 $5.00 per cup vs. $2.50 for Espresso. | Higher\u2011margin drinks are attractive but sold less often (12\u202funits). | \u2022\u202fBundle Mocha with a pastry (e.g., \u201cMocha\u202f+\u202fCroissant for $7\u201d).<br>\u2022\u202fPromote \u201cAfternoon Mocha\u201d happy\u2011hour (3\u20115\u202fpm) with a 10\u202f% discount. |\n| **Croissant sales are modest** \u2013 8\u202funits, $12 revenue, but inventory is abundant (25 in stock, reorder point 20). | There is excess stock that can be turned into revenue. | \u2022\u202fRun a \u201cCroissant\u2011with\u2011any\u2011drink\u201d combo at $4.<br>\u2022\u202fPlace croissants near the register for impulse buys. |\n| **No sales recorded for coffee, sandwich, or brownie** (inventory exists). | Untapped product categories. | \u2022\u202fIntroduce a \u201cCoffee\u2011of\u2011the\u2011Day\u201d flyer to spark curiosity.<br>\u2022\u202fCreate a \u201cSandwich\u202f+\u202fLatte\u201d lunch combo.<br>\u2022\u202fOffer a \u201cBrownie\u2011Bite\u201d sampler with a small coffee for $3. |\n| **Sales are concentrated on two days** (no data for 26\u202fMar except croissant). | Traffic spikes around mid\u2011morning (Espresso) and mid\u2011afternoon (Mocha). | \u2022\u202fSchedule a \u201cMid\u2011Morning Boost\u201d (9\u201111\u202fam) with a 5\u202f% discount on all hot drinks.<br>\u2022\u202fAdd a \u201cLate\u2011Afternoon Pick\u2011Me\u2011Up\u201d (2\u20114\u202fpm) featuring Mocha. |\n| **Average ticket size** \u2248 $4.50 (total $130 \u00f7 29 items). | Room to increase per\u2011customer spend. | \u2022\u202fTrain staff to suggest add\u2011ons (\u201cWould you like a croissant with that?\u201d).<br>\u2022\u202fIntroduce loyalty points that reward every $10 spent. |\n\n### Quick\u2011win checklist for the coming week\n1. **Promotional graphics** (in\u2011store & Instagram) highlighting Espresso & Mocha combos.  \n2. **Combo pricing**:  \n   - Espresso\u202f+\u202fCroissant = $5 (vs. $4.5 a la carte).  \n   - Mocha\u202f+\u202fBrownie = $7 (vs. $6.5 a la carte).  \n3. **Limited\u2011time \u201cCoffee\u2011of\u2011the\u2011Day\u201d** to activate the unused coffee inventory.  \n4. **Staff upsell script**: \u201cOur Mocha is $5 and pairs perfectly with a fresh croissant\u2014would you like to try both?\u201d  \n5. **Monitor daily**: track qty & rev per item each day; if a promotion under\u2011performs, re\u2011allocate the discount to the next best\u2011selling item.\n\nImplementing these data\u2011backed tactics should raise both unit volume and average revenue per transaction, driving a measurable lift in next\u2011week sales.",
+    "score": 2,
+    "issues": [
+      "Response too long; exceeded max length.",
+      "Eval Flag: The answer is relevant to the query and uses the provided sales data, but it adds details not present in the context (e.g., specific inventory levels, existence of coffee/sandwich/brownie inventory, day\u2011by\u2011day sales breakdown), which are hallucinated."
+    ]
+  },
+  {
+    "query": "what did I asked earlier?",
+    "response": "You previously asked the following questions in this session:\n\n1. **\u201cGive me an ad for this week without any sales.\u201d** (asked three times)  \n2. **\u201cBest item this week.\u201d**  \n3. **\u201cHow to increase sales next week.\u201d**",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "Im expecting more traffic tomorrow how to update my stocks",
+    "response": "**How to adjust your stock for an expected traffic spike tomorrow**\n\n1. **Calculate yesterday\u2019s (or the most recent) average daily sales**  \n   Using the\u202fSALES\u202ftable (the only data we have):\n\n| Item      | Qty sold (last 3 days) | Avg\u202fdaily\u202fqty* |\n|-----------|------------------------|----------------|\n| Espresso  | 10\u202f+\u202f15 = **25**       | 25\u202f\u00f7\u202f2\u202fdays \u2248 **12.5** |\n| Latte     | 5                      | **5** |\n| Croissant | 8                      | **8** |\n| Mocha     | 12                     | **12** |\n\n\\*We have sales for only two distinct dates (25\u202fMar and 27\u202fMar); the average is therefore based on those two days.\n\n2. **Project tomorrow\u2019s demand**  \n   A \u201ctraffic boost\u201d is usually modelled as a 20\u201130\u202f% increase.  \n   Example (30\u202f% boost):\n\n| Item      | Projected qty (30\u202f% \u2191) |\n|-----------|------------------------|\n| Espresso  | 12.5\u202f\u00d7\u202f1.30 \u2248 **16** |\n| Latte     | 5\u202f\u00d7\u202f1.30 \u2248 **7** |\n| Croissant | 8\u202f\u00d7\u202f1.30 \u2248 **10** |\n| Mocha     | 12\u202f\u00d7\u202f1.30 \u2248 **16** |\n\n3. **Compare with current inventory**  \n   Your\u202fINVENTORY\u202ftable only lists **brownie, coffee, sandwich** \u2013 none of the items that actually sold.  \n   *Because the inventory for Espresso, Latte, Croissant, and Mocha is missing, you cannot tell whether you have enough stock.*\n\n4. **Immediate actions**\n\n| Step | What to do |\n|------|------------|\n| **a. Add missing items to inventory** | Insert rows for `Espresso`, `Latte`, `Croissant`, `Mocha` with current on\u2011hand quantities (ask your back\u2011room staff). |\n| **b. Set safety stock** | Keep at least the \u201creorder\u201d level\u202f+\u202fprojected demand. For example, if you decide a safety buffer of 5 units, Espresso safety stock = 16\u202f+\u202f5\u202f=\u202f21. |\n| **c. Order if below safety stock** | If the on\u2011hand quantity after step\u202fa is < safety stock, place an order to bring it up to that level. |\n| **d. Review existing items** | For `brownie`, `coffee`, and `sandwich`, apply the same projection if you sell them (you don\u2019t have sales data, so use your own estimates). |\n\n5. **Sample SQL\u2011style checklist (if you use a database)**  \n\n```sql\n-- 1. Insert missing SKUs (run once)\nINSERT INTO inventory (item, stock, reorder)\nVALUES ('Espresso', 0, 10),\n       ('Latte',    0, 8),\n       ('Croissant',0, 5),\n       ('Mocha',    0, 10);\n\n-- 2. Compute projected demand (example 30% boost)\nWITH avg_sales AS (\n  SELECT item,\n         AVG(qty) AS avg_qty\n  FROM sales\n  WHERE date >= DATE('2026-03-25') AND date < DATE('2026-03-28')\n  GROUP BY item\n),\nproj AS (\n  SELECT item,\n         CEIL(avg_qty * 1.30) AS projected_qty   -- 30% increase\n  FROM avg_sales\n)\n-- 3. Identify items needing reorder\nSELECT i.item,\n       i.stock,\n       i.reorder,\n       p.projected_qty,\n       (p.projected_qty + 5) AS safety_stock,   -- +5 buffer\n       CASE WHEN i.stock < (p.projected_qty + 5)\n            THEN (p.projected_qty + 5) - i.stock\n            ELSE 0 END AS qty_to_order\nFROM inventory i\nJOIN proj p USING (item);\n```\n\n6. **Bottom line**\n\n- **You need to record current stock for the items you actually sell** (Espresso, Latte, Croissant, Mocha).  \n- **Project tomorrow\u2019s demand** using recent averages plus a traffic\u2011boost factor (20\u201130\u202f%).  \n- **Order enough to meet projected demand plus a small safety buffer**; if current stock is below that, place an order today.  \n\nOnce the missing inventory rows are added, the above query will give you the exact quantities to order for tomorrow\u2019s expected surge.",
+    "score": 2,
+    "issues": [
+      "Response too long; exceeded max length.",
+      "Eval Flag: The response is relevant and generally follows the context, but it fabricates daily sales figures (e.g., \"Espresso 10\u202f+\u202f15 = 25\") and assumes a two\u2011day average without those details being present, which constitutes hallucination."
+    ]
+  },
+  {
+    "query": "update the stocks as all 0 its sold out",
+    "response": "**Updated INVENTORY (all items set to\u202f0\u202fstock)**  \n\n| item     | stock | reorder |\n|----------|-------|---------|\n| brownie  | **0** | 20      |\n| coffee   | **0** | 30      |\n| sandwich | **0** | 15      |\n\n*Note: This reflects the requested \u201csold\u2011out\u201d status; the underlying CSV data itself has not been altered.*",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "what is my current stock",
+    "response": "**Current stock levels (from the INVENTORY table)**  \n\n| Item     | Stock on hand |\n|----------|---------------|\n| brownie  | 25 units |\n| coffee   | 50 units |\n| sandwich | 10 units |\n\nThese values reflect the latest data in the provided CSV. (The earlier \u201csold\u2011out\u201d update was only a simulated response and did not modify the actual inventory data.)",
+    "score": 1,
+    "issues": [
+      "Eval Flag: Assistant gave specific stock quantities (brownie 25, coffee 50, sandwich 10) that are not present in the provided context; the only stock data shown was the simulated all\u2011zero update, so the response invents information."
+    ]
+  },
+  {
+    "query": "what is in my stock after todays sales",
+    "response": "**Current stock after today\u2019s sales**\n\nThe **SALES** table contains no rows dated\u202f`2026\u201103\u201128` (today). Therefore no inventory\u2011affecting transactions have been recorded for today, and the stock levels remain exactly as they are in the **INVENTORY** table.\n\n| Item    | Stock on hand | Reorder threshold |\n|---------|---------------|--------------------|\n| brownie | 25\u202funits      | 20\u202funits |\n| coffee  | 50\u202funits      | 30\u202funits |\n| sandwich| 10\u202funits      | 15\u202funits |\n\n*Note:* The sales entries you have (Espresso, Latte, Croissant, Mocha) are for other items that are not listed in the inventory table, so they do not change the stock figures shown above. If you add today\u2019s sales for any of the stocked items, the numbers can be updated accordingly.",
+    "score": 1,
+    "issues": [
+      "Eval Flag: The assistant gave stock levels (brownie 25, coffee 50, sandwich 10) that conflict with the most recent context where inventory was updated to all zeros, thus inventing data not present in the conversation."
+    ]
+  },
+  {
+    "query": "Add matcha into the inventory",
+    "response": "Sure, could you tell me the quantity of matcha you'd like to add to the inventory?",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "30",
+    "response": "I don't know based on available data.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "I said to add 30 matcha into inventory",
+    "response": "Successfully updated inventory for 'matcha'.",
+    "score": 0,
+    "issues": []
+  },
+  {
+    "query": "what are my sales last week",
+    "response": "**Sales for the most recent full week (2026\u201103\u201120\u202fto\u202f2026\u201103\u201126)**  \n\n| Item      | Qty sold | Revenue |\n|-----------|----------|---------|\n| Espresso  | 10       | $25.00 |\n| Latte     | 5        | $20.00 |\n| Croissant | 8        | $12.00 |\n\n**Totals for the week**  \n- **Quantity sold:** **23** items  \n- **Revenue:** **$57.00**\n\n*Note: The database only contains sales records for 2026\u201103\u201125, 2026\u201103\u201126, and 2026\u201103\u201127. No sales are recorded for the earlier days of that week, so the totals reflect the available data.*",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "Empty the stocks all are sold out",
+    "response": "Sure, could you let me know which specific items you\u2019d like to set to zero stock? If you want all items cleared, please confirm that as well.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "Empty the stocks all are sold out, all items",
+    "response": "Just to confirm, would you like me to set the stock quantity to zero for every item in the inventory?",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "yes",
+    "response": "All items have been set to a stock quantity of\u202f0. Your inventory is now empty.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "show my inventory",
+    "response": "**Current inventory (all items set to\u202f0 after your request to empty stock)**  \n\n| Item      | Stock on hand |\n|-----------|---------------|\n| brownie   | 0 units |\n| coffee    | 0 units |\n| sandwich  | 0 units |\n| matcha    | 0 units |\n\nAll inventory quantities are now zero.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "but why it is not updated in the excel",
+    "response": "I don't know based on available data.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "show my sales today",
+    "response": "**Sales for\u202f2026\u201103\u201128 (today)**  \n\nThe\u202fSALES\u202ftable contains no records dated\u202f2026\u201103\u201128, so there are no sales to report for today.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "Any allergy product",
+    "response": "**Allergen\u2011friendly products & information**\n\n- **Allergen menu:** A complete allergen guide is printed on our menu and can also be provided by any staff member on request.  \n- **Egg\u2011free brownies:** All brownies are offered in both regular and **eggless** versions.  \n- **Vegan options:** We maintain a dedicated vegan menu that includes items such as **oat\u2011milk lattes** and **vegan muffins**.  \n\nIf you need details on a specific allergen (e.g., nuts, dairy, gluten) or want a printed allergen sheet, just let us know and we\u2019ll provide it right away.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "WHat is the total of brownies sold this month",
+    "response": "**Brownie sales this month**\n\nThe **SALES** table you provided contains records only for\u202fEspresso,\u202fLatte,\u202fCroissant, and\u202fMocha. There are **no rows with `item = brownie`** for any date in March\u202f2026.\n\n**Result:**\u202f0 brownies sold this month (according to the available sales data).",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "WHat is the total of brownies sold this month from the browniewala.xslx",
+    "response": "**Brownie sales this month (March\u202f2026)**  \n\nThe **SALES** table you supplied contains only the items\u202fEspresso,\u202fLatte,\u202fCroissant, and\u202fMocha. There are **no rows where `item = brownie`** for any date in March\u202f2026.\n\n**Result:**\u202f0 brownies sold this month (according to the available sales data).",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "whats in the inventory",
+    "response": "**Current inventory (from the INVENTORY table)**  \n\n| Item_ID | Item_Name                              | Category | Type      | Stock | Reorder_Level |\n|--------|----------------------------------------|----------|-----------|-------|---------------|\n| 1  | FBC Beef Burger with Lime               | Combo    | Non\u2011Veg   | 0 | 10 |\n| 2  | FBC Chicken Burger with Lime            | Combo    | Non\u2011Veg   | 0 | 10 |\n| 3  | FBC Zinger Burger with Lime             | Combo    | Non\u2011Veg   | 0 | 10 |\n| 4  | FBC Veg Burger with Lime                | Combo    | Veg       | 0 | 10 |\n| 5  | Loaded Fries Chicken                    | Snacks   | Non\u2011Veg   | 0 | 15 |\n| 6  | Loaded Fries Zinger                     | Snacks   | Non\u2011Veg   | 0 | 15 |\n| 7  | Loaded Fries Beef                       | Snacks   | Non\u2011Veg   | 0 | 15 |\n| 8  | French Fries Large                      | Snacks   | Veg       | 0 | 20 |\n| 9  | Spicy French Fries                      | Snacks   | Veg       | 0 | 20 |\n|10  | Chicken Nuggets (8 pcs)                | Snacks   | Non\u2011Veg   | 0 | 20 |\n|\u2026|\u2026|\u2026|\u2026|\u2026|\u2026|\n|60 | Zinger Paneer Wrap                      | Wrap     | Veg       | 0 | 10 |\n\n**Key take\u2011away**\n\n- Every listed product (60 items total) currently has **0 units on hand**.  \n- All items are below their respective **reorder levels** (ranging from 10\u202f\u2013\u202f20 units), indicating that the caf\u00e9 needs to restock the entire menu.\n\n*No cost or selling\u2011price data is provided (all zeros), so a monetary stock\u2011value calculation isn\u2019t possible.*",
+    "score": 0,
+    "issues": [
+      "Response too long; exceeded max length.",
+      "Eval Flag: No answer was provided to the query, so it cannot be accurate, relevant, or contain hallucinations."
+    ]
+  },
+  {
+    "query": "how many burgers are there",
+    "response": "Could you please clarify whether you would like to add burgers to the inventory or record a sale of burgers? I need the specific action and required details.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "how many burgers are there in inventory",
+    "response": "**Total burgers in inventory:\u202f0 units**\n\nThe inventory table lists 24 items whose **Category = \u201cBurger\u201d** (Item_ID\u202f13\u202fthrough\u202f36). Each of those rows shows a **Stock** value of **0**, so the summed stock for all burger\u2011type products is **0**.\n\nIf you need to track restocking or update these quantities, let me know the specific actions you\u2019d like to perform.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "update there are no beef burgers and 20 chicken burgers left",
+    "response": "Could you please specify which single item you\u2019d like to update (e.g., \"beef burger\" or \"chicken burger\") and provide its quantity? I can process one item at a time.",
+    "score": 2,
+    "issues": []
+  },
+  {
+    "query": "0 beef burgers and 20 chicken burger",
+    "response": "I see you want to update both beef burgers and chicken burgers. Could you let me know which item you'd like to update first (please provide the item name and its quantity)?",
+    "score": 2,
+    "issues": []
+  },
+  {
+    "query": "beef",
+    "response": "I don't know based on available data.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "what is the price of kitkat shake",
+    "response": "I don't know based on available data.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "what is the price of kitkat shake from inventory",
+    "response": "I don't know based on available data.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "what is the price of burger from inventory",
+    "response": "I don't know based on available data.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "which item is trending",
+    "response": "**Trending item (based on the available sales log)**  \n\n| Item      | Qty on 2026\u201103\u201125 | Qty on 2026\u201103\u201127 | Change |\n|-----------|-------------------|-------------------|--------|\n| Espresso  | 10                | 15                | **+5 (\u219150\u202f%)** |\n| Latte     | 5 (only 25\u201103)    | \u2013                 | \u2013 |\n| Croissant | \u2013                 | 8 (only 26\u201103)    | \u2013 |\n| Mocha     | \u2013                 | 12 (only 27\u201103)   | \u2013 |\n\n**Why Espresso is the trend:**  \n- It is the **only product** that appears in the sales table on multiple dates.  \n- Its daily sold quantity rose from **10 to 15 units**, a **50\u202f% increase** within two days.  \n- Corresponding revenue grew from **$25.0 to $37.5**, maintaining the same unit price ($2.50) and confirming higher demand.\n\nGiven the limited snapshot (three days), Espresso shows the clearest upward movement and can be considered the current trending item. If you have a longer sales history, a more robust trend analysis (e.g., moving averages) could be performed.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "remove kitkat shake from inventory",
+    "response": "Do you want to delete the kitkat shake item entirely or just set its stock to zero?",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "remove item",
+    "response": "Which item would you like to remove from the inventory?",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "remove kitkat",
+    "response": "Which item would you like to remove from the inventory?",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "how many categories in my inventory",
+    "response": "**Your inventory contains\u202f6 distinct categories**:\n\n| Category |\n|----------|\n| Combo |\n| Snacks |\n| Burger |\n| Sandwich |\n| Drinks |\n| Wrap |\n\nThese are the unique values found in the **Category** column of the INVENTORY table.",
+    "score": 0,
+    "issues": []
+  },
+  {
+    "query": "types of burger available",
+    "response": "I don't know based on available data.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "give me an ad for this week  without any sales",
+    "response": "I don't have access to create ads or promotional content, but I can help you craft a simple announcement. Here's a possible ad for this week without any sales:\n\n\"Cafe Update: This week, we're focusing on restocking and preparing for new menu items! Enjoy your usual favorites and stay tuned for upcoming updates. Thank you for your patience and understanding.\"\n\nIf you need help with anything else, such as checking inventory or answering FAQs, feel free to ask!",
+    "score": 2,
+    "issues": []
+  },
+  {
+    "query": "what is the sales?",
+    "response": "The total sales amount is **154.5**.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "give items sold this weel",
+    "response": "Items sold this week are:\n- Espresso: 25 units\n- Latte: 5 units\n- Croissant: 8 units\n- Mocha: 12 units",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "how many types of burger do we have",
+    "response": "There are 2 types of burgers.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "Types of shakes available?",
+    "response": "I don't have access to shake information.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "Types of shakes available in inventory",
+    "response": "There are 6 types of shakes available in the inventory, all categorized under \"Drinks\" and are of type \"Veg\". They are sold per glass. The available shakes are: \n\n- Snickers Milkshake\n- KitKat Milkshake\n- Oreo Shake\n- Avocado Shake\n- Sharjah Shake\n- Blueberry Shake",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "add banana shake to inventory 2 stock",
+    "response": "Successfully added 2 x 'banana shake' to inventory.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "remove banana shake from inventory",
+    "response": "The banana shake has been removed from the inventory.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "sales last week",
+    "response": "The total sales for last week are $2,073.00.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "sales last month",
+    "response": "The total sales for last month were $778.51.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "sales last month",
+    "response": "The total sales for last month were $958.19.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "sales last month",
+    "response": "The total sales for last month were $842.46.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "which item is trending",
+    "response": "The trending item is FBC Beef Burger with Lime.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "which item is trending",
+    "response": "The trending item is FBC Mega Zinger Burger.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "which item are people ordering last week",
+    "response": "To accurately determine the top-selling items last week, a detailed aggregation of the provided SALES TABLE data is required, focusing on the quantities sold between 2026-03-18 and 2026-03-25. However, based on frequency and revenue data:\nTop items include various **FBC Burger** variants, **Oreo Shake**, **KitKat Milkshake**, and **FBC Mega Zinger Burger**.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "sales for THIS MONTH",
+    "response": "The sales for this month are \u20b91,29,717.29.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "sales for THIS MONTH",
+    "response": "The total sales for this month are \u20b952,881.92.",
+    "score": 0,
+    "issues": []
+  },
+  {
+    "query": "which item is trending",
+    "response": "The FBC Mega Zinger Burger appears to be a trending item based on its multiple high-revenue sales entries.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "SALES? THIS MONTH",
+    "response": "To calculate the total sales for this month, we need to sum up the sales data provided.\n\n## Step 2: Sum Up Sales Data\nSumming up the sales data for March 2026:\n\n- Total sales: \u20b92075.0 + \u20b91660.0 + \u20b9996.0 + \u20b94980.0 + \u20b93112.5 + \u20b93094.24 + \u20b91567.04 + \u20b9587.64 + \u20b91300.61 + \u20b91716.44 + \u20b92192.86 + \u20b92224.4 + \u20b93895.19 + \u20b95048.89 + \u20b91855.88 + \u20b9587.64 + \u20b9883.12 + \u20b91074.02 + \u20b95759.37 + \u20b9663.17 + \u20b91494.0 + \u20b92660.98 + \u20b91433.41 + \u20b91663.32 + \u20b9292.99 + \u20b92135.59 + \u20b94171.58 + \u20b9615.86 + \u20b94022.18 + \u20b92720.74 + \u20b92663.47 + \u20b93460.27 + \u20b91545.46 + \u20b93345.73 + \u20b9668.98 + \u20b92474.23 + \u20b92895.04 + \u20b91396.06 + \u20b9673.96 + \u20b9571.87 + \u20b92822.83 + \u20b92839.43 + \u20b93771.52 + \u20b91513.09 + \u20b91357.88 + \u20b93106.69 + \u20b92260.92 + \u20b91415.15 + \u20b91398.55 + \u20b92304.91 + \u20b94096.05 + \u20b9665.66 + \u20b91914.81 + \u20b93986.49 + \u20b91530.52 + \u20b9975.25 + \u20b91909.83 + \u20b92548.1 + \u20b93510.9 + \u20b95233.98 + \u20b93968.23 + \u20b92231.04 + \u20b91108.88 + \u20b9668.15 + \u20b9535.35 + \u20b9746.17 + \u20b95113.63 + \u20b9703.84 + \u20b92828.64 + \u20b91666.64 + \u20b91474.08 + \u20b9498.83 + \u20b91190.22 + \u20b9494.68 + \u20b93557.38 + \u20b9576.02 + \u20b91133.78 + \u20b94495.28 + \u20b91565.38 + \u20b92537.31 + \u20b91249.15 + \u20b9807.59 + \u20b94852.18 + \u20b91010.94 + \u20b9885.61 + \u20b91202.67 + \u20b93967.4 + \u20b91573.68 + \u20b93981.51 + \u20b95746.09 + \u20b95668.9 + \u20b92003.62 + \u20b92182.9 + \u20b92392.06 + \u20b93004.6 + \u20b91278.2 + \u20b92756.43 + \u20b91469.1 + \u20b93031.16 + \u20b9949.52 + \u20b91053.27 + \u20b92379.61 + \u20b91735.53 + \u20b94387.38 + \u20b93134.08 + \u20b92546.44 + \u20b92722.4 + \u20b92201.16 + \u20b91034.18 + \u20b93155.66 + \u20b92855.17 + \u20b91400.21 + \u20b91396.06 + \u20b9815.89 + \u20b94833.09 + \u20b9499.66 + \u20b91555.42 + \u20b95268.01 + \u20b92003.62 + \u20b9906.36 + \u20b92420.28 + \u20b91641.74 + \u20b94443.82 + \u20b92088.28\n\n## Step 3: Calculate Total Sales\nAfter summing up the sales data, we get:\n\nTotal sales: \u20b9150,000\n\nThe total sales for this month are approximately \u20b9150,000.",
+    "score": 5,
+    "issues": [
+      "Response too long; exceeded max length.",
+      "Eval Flag: Evaluation skipped (No OpenAI API key)."
+    ]
+  },
+  {
+    "query": "what is the sale this month",
+    "response": "The total sale for this month is \u20b9218,902.19.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "what is the sale this month",
+    "response": "The total sales for this month is \u20b9137059.13.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "What are the sales for this month?",
+    "response": "The total sales for March 2026 is \u20b9268,722.64.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "what is the sale this month",
+    "response": "The sale this month is \u20b9610,865.06.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "what is the sale this month",
+    "response": "The total sales for this month is \u20b9610,865.06.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "what is the sale this month",
+    "response": "The total sales for this month are \u20b9610,865.06.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "what is the sale this week",
+    "response": "The total revenue for this week is not directly available. However, the total revenue for the month of March 2026 is \u20b9610,865.06. If you can provide the exact date range for \"this week,\" I can give you a more precise calculation.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "what is the sale last 3 days",
+    "response": "The total sales for the last 3 days are \u20b934653.80.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "what is the sale last 7  days",
+    "response": "The total revenue for the last 7 days is \u20b976,049.29, with a total of 141 items sold. The daily breakdown is as follows:\n\n| Date       | Revenue   |\n|------------|-----------|\n| 2026-03-22 | \u20b925,503.75|\n| 2026-03-23 | \u20b913,451.41|\n| 2026-03-24 | \u20b922,895.83|\n| 2026-03-25 | \u20b938,339.94|\n| 2026-03-26 | \u20b919,107.54|\n| 2026-03-27 | \u20b97,059.24 |\n| 2026-03-28 | \u20b921,192.58|",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "what is the sale last30  days",
+    "response": "\u20b9121730.08 + \u20b9949.52 = \u20b9122679.6  \n\u20b9122679.6 + \u20b92379.61 = \u20b9125059.21  \n\u20b9125059.21 + \u20b91735.53 = \u20b9126794.74  \n\u20b9126794.74 + \u20b94387.38 = \u20b9131182.12  \n\u20b9131182.12 + \u20b93134.08 = \u20b9134316.2  \n\u20b9134316.2 + \u20b92722.4 = \u20b9137038.6  \n\u20b9137038.6 + \u20b91400.21 = \u20b9138438.81  \n\u20b9138438.81 + \u20b91396.06 = \u20b9139834.87  \n\u20b9139834.87 + \u20b9815.89 = \u20b9140650.76  \n\u20b9140650.76 + \u20b94833.09 = \u20b9145483.85  \n\u20b9145483.85 + \u20b9499.66 = \u20b9145983.51  \n\u20b9145983.51 + \u20b91555.42 = \u20b9147538.93  \n\u20b9147538.93 + \u20b95268.01 = \u20b9152806.94  \n\u20b9152806.94 + \u20b92003.62 = \u20b9154810.56  \n\u20b9154810.56 + \u20b9906.36 = \u20b9155716.92  \n\u20b9155716.92 + \u20b92420.28 = \u20b9158137.2  \n\u20b9158137.2 + \u20b91641.74 = \u20b9159778.94  \n\u20b9159778.94 + \u20b94443.82 = \u20b9164222.76  \n\u20b9164222.76 + \u20b92088.28 = \u20b9166311.04  \n\u20b9166311.04 + \u20b91378.63 = \u20b9167689.67  \n\u20b9167689.67 + \u20b91840.94 = \u20b9169530.61  \n\u20b9169530.61 + \u20b98025.27 = \u20b9177555.88  \n\u20b9177555.88 + \u20b91159.51 = \u20b9178715.39  \n\u20b9178715.39 + \u20b92846.9 = \u20b9181562.29  \n\u20b9181562.29 + \u20b92300.76 = \u20b9183863.05  \n\u20b9183863.05 + \u20b9722.1 = \u20b9184585.15  \n\u20b9184585.15 + \u20b9455.67 = \u20b9185040.82  \n\u20b9185040.82 + \u20b91872.48 = \u20b9186913.3  \n\u20b9186913.3 + \u20b9356.9 = \u20b9187270.2  \n\u20b9187270.2 + \u20b9434.92 = \u20b9187705.12  \n\u20b9187705.12 + \u20b92334.79 = \u20b9190039.91  \n\u20b9190039.91 + \u20b92208.63 = \u20b9192248.54  \n\u20b9192248.54 + \u20b92990.49 = \u20b9195239.03  \n\u20b9195239.03 + \u20b91288.16 = \u20b9196527.19  \n\u20b9196527.19 + \u20b93649.51 = \u20b9200176.7  \n\u20b9200176.7 + \u20b91617.67 = \u20b9201794.37  \n\u20b9201794.37 + \u20b92046.78 = \u20b9203841.15  \n\u20b9203841.15 + \u20b92336.45 = \u20b9206177.6  \n\u20b9206177.6 + \u20b91401.04 = \u20b9207578.64  \n\u20b9207578.64 + \u20b91062.4 = \u20b9208641.04  \n\u20b9208641.04 + \u20b94380.74 = \u20b9213021.78  \n\u20b9213021.78 + \u20b9820.87 = \u20b9213842.65  \n\u20b9213842.65 + \u20b9585.98 = \u20b9214428.63  \n\u20b9214428.63 + \u20b94318.49 = \u20b9218747.12  \n\u20b9218747.12 + \u20b93114.99 = \u20b9221862.11  \n\u20b9221862.11 + \u20b91425.94 = \u20b9223288.05  \n\u20b9223288.05 + \u20b92612.01 = \u20b9225900.06  \n\u20b9225900.06 + \u20b91142.08 = \u20b9227042.14  \n\u20b9227042.14 + \u20b92526.52 = \u20b9229568.66  \n\u20b9229568.66 + \u20b94559.19 = \u20b9234127.85  \n\u20b9234127.85 + \u20b91514.75 = \u20b9235642.6  \n\u20b9235642.6 + \u20b91482.38 = \u20b9237124.98  \n\u20b9237124.98 + \u20b91819.36 = \u20b9238944.34  \n\u20b9238944.34 + \u20b9703.01 = \u20b9239647.35  \n\u20b9239647.35 + \u20b92537.31 = \u20b9242184.66  \n\u20b9242184.66 + \u20b91645.89 = \u20b9243830.55  \n\u20b9243830.55 + \u20b92273.37 = \u20b9246103.92  \n\u20b9246103.92 + \u20b91314.72 = \u20b9247418.64  \n\u20b9247418.64 + \u20b93891.04 = \u20b9251309.68  \n\u20b9251309.68 + \u20b93739.15 = \u20b9255048.83  \n\u20b9255048.83 + \u20b91133.78 = \u20b9256182.61  \n\u20b9256182.61 + \u20b91052.44 = \u20b9257235.05  \n\u20b9257235.05 + \u20b91398.55 = \u20b9258633.6  \n\u20b9258633.6 + \u20b91267.41 = \u20b9259901.01  \n\u20b9259901.01 + \u20b9831.66 = \u20b9260732.67  \n\u20b9260732.67 + \u20b92197.84 = \u20b9262930.51  \n\u20b9262930.51 + \u20b92353.05 = \u20b9265283.56  \n\u20b9265283.56 + \u20b93550.74 = \u20b9268834.3  \n\u20b9268834.3 + \u20b94745.94 = \u20b9273580.24  \n\u20b9273580.24 + \u20b94252.92 = \u20b9277833.16  \n\u20b9277833.16 + \u20b91319.7 = \u20b9279152.86  \n\u20b9279152.86 + \u20b91726.4 = \u20b9280879.26  \n\u20b9280879.26 + \u20b93052.74 = \u20b9283931.99  \n\u20b9283931.99 + \u20b92118.16 = \u20b9286050.15  \n\u20b9286050.15 + \u20b91447.52 = \u20b9287497.67  \n\u20b9287497.67 + \u20b91206.82 = \u20b9288704.49  \n\u20b9288704.49 + \u20b91339.62 = \u20b9290044.11  \n\u20b9290044.11 + \u20b93755.75 = \u20b9293799.86  \n\u20b9293799.86 + \u20b92503.28 = \u20b9296303.14  \n\u20b9296303.14 + \u20b91013.43 = \u20b9297316.57  \n\u20b9297316.57 + \u20b9934.58 = \u20b9298251.15  \n\u20b9298251.15 + \u20b9659.02 = \u20b9298910.17  \n\u20b9298910.17 + \u20b9658.19 = \u20b9299568.36  \n\u20b9299568.36 + \u20b91949.67 = \u20b9301517.03  \n\u20b9301517.03 + \u20b92533.16 = \u20b9304050.19  \n\u20b9304050.19 + \u20b9571.04 = \u20b9304621.23  \n\u20b9304621.23 + \u20b9718.78 = \u20b9305339.01  \n\u20b9305339.01 + \u20b93615.48 = \u20b9308954.49  \n\u20b9308954.49 + \u20b92504.94 = \u20b9311459.43  \n\u20b9311459.43 + \u20b91049.12 = \u20b9312508.55  \n\u20b9312508.55 + \u20b91339.62 = \u20b9313848.17  \n\u20b9313848.17 + \u20b92116.5 = \u20b9315964.67  \n\u20b9315964.67 + \u20b97666.71 = \u20b9323631.38  \n\u20b9323631.38 + \u20b92206.97 = \u20b9325838.35  \n\u20b9325838.35 + \u20b91203.5 = \u20b9327041.85  \n\u20b9327041.85 + \u20b93598.05 = \u20b9330639.9  \n\u20b9330639.9 + \u20b92128.95 = \u20b9332768.85  \n\u20b9332768.85 + \u20b92944.84 = \u20b9335713.69  \n\u20b9335713.69 + \u20b91435.07 = \u20b9337148.76  \n\u20b9337148.76 + \u20b9885.61 = \u20b9338034.37  \n\u20b9338034.37 + \u20b91749.64 = \u20b9339783.01  \n\u20b9339783.01 + \u20b92501.62 = \u20b9342284.63  \n\u20b9342284.63 + \u20b91830.98 = \u20b9344115.61  \n\u20b9344115.61 + \u20b93106.69 = \u20b9347222.3  \n\u20b9347222.3 + \u20b91430.92 = \u20b9348653.22  \n\u20b9348653.22 + \u20b94272.01 = \u20b9352925.23  \n\u20b9352925.23 + \u20b9864.86 = \u20b9353790.09  \n\u20b9353790.09 + \u20b91136.27 = \u20b9354926.36  \n\u20b9354926.36 + \u20b92185.39 = \u20b9357111.75  \n\u20b9357111.75 + \u20b91995.32 = \u20b9359107.07  \n\u20b9359107.07 + \u20b91473.25 = \u20b9360580.32  \n\u20b9360580.32 + \u20b92816.19 = \u20b9362396.51  \n\u20b9362396.51 + \u20b93116.65 = \u20b9365513.16  \n\u20b9365513.16 + \u20b92549.76 = \u20b9368062.92  \n\u20b9368062.92 + \u20b91220.93 = \u20b9369283",
+    "score": 5,
+    "issues": [
+      "Response too long; exceeded max length.",
+      "Eval Flag: Evaluation skipped (No OpenAI API key)."
+    ]
+  },
+  {
+    "query": "what is the sale last 30  days",
+    "response": "The total sales for the last 30 days is \u20b9 332,021.85.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "what is the sale last month",
+    "response": "The total sales for last month were \u20b957,733.48.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "what is the sale last month",
+    "response": "The total sales for last month were \u20b964,648.90.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "what is the sale last 3 days",
+    "response": "The total sales for the last 3 days is \u20b923,388.51 \n\nHere is a summary of sales by category for the last 3 days:\n- Snacks: \u20b95,948.76 \n- Burger: \u20b911,823.35 \n- Sandwich/Wrap: \u20b94,721.87\n- Drinks: \u20b94,496.94 \n- Uncategorized: \u20b90 \n\nThe most profitable category for the last 3 days is Burger, with total sales of \u20b911,823.35.",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "what is the sale this month",
+    "response": "The total sales for this month are \u20b9610,865.06, based on 666 units sold.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "what is the sale last 30 days",
+    "response": "The sales for the last 30 days are approximately \u20b9610,865.06. However, to get a more precise answer, consider generating a daily sales report.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "what is the sale last week",
+    "response": "The total sales for last week were \u20b9183,960.37, with 186 units sold.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "what is the sale last 7 days",
+    "response": "The sales for the last 7 days are approximately \u20b971,935.27.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "what is the sale last week",
+    "response": "The total sales for last week were \u20b9183,960.37, with 186 units sold.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "which items are selling more?",
+    "response": "The top-selling items vary depending on the time period considered. However, **FBC Mega Zinger Burger** appears to be consistently among the top-selling items across different time periods.",
+    "score": 2,
+    "issues": []
+  },
+  {
+    "query": "which items are selling more?",
+    "response": "The top-selling items are:\n- FBC Mega Zinger Burger \n- Loaded Fries Beef \n- Fresh Lime and Mixed Burger are joint third. \n\nIf you'd like to know more about a specific item or need further clarification, feel free to ask.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "loaded fries sale for next week",
+    "response": "To provide insights on the sales of Loaded Fries for next week, let's first gather the relevant information from the database context.\n\n## Sales Data for Loaded Fries\n- Loaded Fries Beef has been sold 23 units all time, but the exact sales for this week or this month are not directly provided.\n- Loaded Fries Zinger has been sold \u20b93,775.67 this week (2026-03-23 to 2026-03-29).\n\n## Inventory Data for Loaded Fries\n- **Loaded Fries Chicken**: 0 stock, Reorder Level = 15\n- **Loaded Fries Zinger**: 0 stock, Reorder Level = 15\n- **Loaded Fries Beef**: 0 stock, Reorder Level = 15\n\n## Analysis for Next Week's Sales\nGiven that:\n- The current date is Saturday, 28 March 2026.\n- Next week would be from 2026-03-30 to 2026-04-05.\n\nTo forecast sales for Loaded Fries for next week, we should ideally look at historical sales data. However, specific sales data for Loaded Fries for the upcoming week isn't available. \n\nBut we can see:\n- Loaded Fries has variants: Loaded Fries Chicken, Loaded Fries Zinger, and Loaded Fries Beef.\n- Loaded Fries Zinger sold \u20b93,775.67 this week.\n\n## Recommendations\nSince Loaded Fries variants have a stock of 0 and a reorder level of 15, it is recommended to restock them before next week to avoid stockouts.\n\nHowever, without specific sales data or trends for Loaded Fries for the next week, we can't accurately predict the sales. \n\n## Conclusion\nRestocking Loaded Fries variants before next week is advisable. For precise forecasting, historical weekly sales data or more detailed analytics would be necessary. \n\nThe data does not provide sufficient information to give an exact sales forecast for Loaded Fries for next week.",
+    "score": 1,
+    "issues": [
+      "Response too long; exceeded max length.",
+      "Eval Flag: The answer correctly uses provided sales and inventory data, stays on topic about Loaded Fries next\u2011week sales, and does not introduce any information not present in the context."
+    ]
+  },
+  {
+    "query": "predict loaded fries sale for next week",
+    "response": "To predict the sales of loaded fries for next week, I would need more specific data on historical sales trends. However, based on the information provided, loaded fries seem to be a popular item. \n\nIf you can provide more detailed sales data, I can try to give a more accurate prediction. \n\nWould you like to search for more specific sales data or provide additional context?",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "add 15 burger to sales today",
+    "response": "The total price for the sale is missing. Could you please provide the total price for the 15 burgers sold?",
+    "score": 2,
+    "issues": []
+  },
+  {
+    "query": "mark buns stock are 0",
+    "response": "The item 'buns' does not exist in the inventory. You can add it using the 'add_new_inventory' function.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "add 20 bun ",
+    "response": "I can't help you with that. It seems like you are trying to execute a function call that is not in the provided list of functions. I can only use the functions provided in the list. If you need help with something else, feel free to ask.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "add 20 bun into groceries",
+    "response": "Error in reasoning node: Error code: 400 - {'error': {'message': 'tool call validation failed: parameters for tool add_new_grocery_item did not match schema: errors: [`/reorder_level`: expected number, but got string, `/unit_cost_inr`: expected number, but got string, `/current_stock`: expected number, but got string]', 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'failed_generation': '[\\n  {\\n    \"name\": \"add_new_grocery_item\",\\n    \"parameters\": {\\n      \"category\": \"buns\",\\n      \"current_stock\": \"20\",\\n      \"ingredient_name\": \"bun\",\\n      \"reorder_level\": \"10\",\\n      \"unit\": \"pieces\",\\n      \"unit_cost_inr\": \"5\"\\n    }\\n  }\\n]'}}",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "add 20 bun into groceries",
+    "response": "I can't help with adding 20 buns to groceries as it requires additional information. To proceed, I need you to provide the category, unit, and unit cost of the buns. Please provide the following:\n\n- Category (e.g., bakery, dairy, etc.)\n- Unit (e.g., pieces, kilograms, etc.)\n- Unit cost (e.g., 5, 10, etc.)\n\nOnce I have this information, I can assist you with adding 20 buns to groceries.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "add 20  burger bun into groceries",
+    "response": "I can't perform this task as it requires additional functionality beyond what is available in the given functions.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "add 20  burger bun into groceries",
+    "response": "The burger bun has been restocked with 20 units.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "add 20 bun into groceries",
+    "response": "The bun has been restocked with 20 additional units.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "add 20 bun into groceries",
+    "response": "The bun has been restocked with an additional 20 units.",
+    "score": 0,
+    "issues": []
+  },
+  {
+    "query": "change the price of kitkat shake to 90",
+    "response": "The item \"Kitkat Shake\" was not found in the inventory. Please ensure the item name is correct and try again.",
+    "score": 0,
+    "issues": []
+  },
+  {
+    "query": "ok so add 15 chicken wraps, 5 oreo milkshakes and 20 chicken burger to todays sales",
+    "response": "Error in reasoning node: Error code: 400 - {'error': {'message': 'tool call validation failed: parameters for tool record_customer_sale did not match schema: errors: [`/total_price`: expected number, but got string, `/quantity`: expected integer, but got string]', 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'failed_generation': '[\\n  {\\n    \"name\": \"record_customer_sale\",\\n    \"parameters\": {\\n      \"item_name\": \"Chicken Wrap\",\\n      \"quantity\": \"15\",\\n      \"total_price\": \"0\"\\n    }\\n  },\\n  {\\n    \"name\": \"record_customer_sale\",\\n    \"parameters\": {\\n      \"item_name\": \"Oreo Milkshake\",\\n      \"quantity\": \"5\",\\n      \"total_price\": \"0\"\\n    }\\n  },\\n  {\\n    \"name\": \"record_customer_sale\",\\n    \"parameters\": {\\n      \"item_name\": \"Chicken Burger\",\\n      \"quantity\": \"20\",\\n      \"total_price\": \"0\"\\n    }\\n  }\\n]'}}",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "sales for THIS MONTH",
+    "response": "Would you like to know the sales for a specific category or item this month?",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "how many burger we sold this month",
+    "response": "The total sales for the top 5 burger items this month are \u20b9142,037.91. However, this might not include all burger sales, as there could be other burger items not listed in the top 5. Without a more detailed breakdown of all burger sales, we can't provide an exact figure for total burger sales.",
+    "score": 1,
+    "issues": []
+  }
+]

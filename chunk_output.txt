@@ -1,0 +1,12 @@
+2026-03-28 14:35:33 | INFO     | faiss.loader — Loading faiss with AVX512 support.
+2026-03-28 14:35:33 | INFO     | faiss.loader — Could not load library with AVX512 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx512'")
+2026-03-28 14:35:33 | INFO     | faiss.loader — Loading faiss with AVX2 support.
+2026-03-28 14:35:33 | INFO     | faiss.loader — Successfully loaded faiss with AVX2 support.
+Traceback (most recent call last):
+  File "C:\Users\user\Desktop\Cloud\AIBO\ai-cafe-manager\test_chunks.py", line 16, in <module>
+    print(f"\n\u2705 FAQ loaded successfully — {len(txt)} chars")
+  File "C:\Users\user\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 2: character maps to <undefined>
