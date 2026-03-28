@@ -1,0 +1,30 @@
+ingredient_id,ingredient_name,category,unit,current_stock,reorder_level,unit_cost_inr
+1,Burger Bun,Bakery,pcs,94.0,50.0,15.0
+2,Chicken Breast,Meat,g,-5760.0,3000.0,0.25
+3,Minced Beef,Meat,g,1400.0,2000.0,0.35
+4,Sandwich Bread,Bakery,slice,100.0,20.0,5.0
+5,Potato,Vegetable,g,5880.0,5000.0,0.04
+6,Onion,Vegetable,g,3440.0,1500.0,0.05
+7,Lettuce (Iceberg),Vegetable,g,-920.0,500.0,0.1
+8,Tomato,Vegetable,g,660.0,1000.0,0.06
+9,Cheese Slice,Dairy,pcs,102.0,30.0,12.0
+10,Paneer,Dairy,g,2000.0,500.0,0.3
+11,Zinger Sauce,Sauce,ml,-40.0,500.0,0.2
+12,Mayo,Sauce,ml,-780.0,1000.0,0.15
+13,Lime,Fruit,pcs,22.0,20.0,3.0
+14,Ginger,Vegetable,g,500.0,100.0,0.12
+15,Apple,Fruit,pcs,50.0,10.0,20.0
+16,Orange,Fruit,pcs,60.0,15.0,10.0
+17,Grape,Fruit,g,2000.0,500.0,0.1
+18,Watermelon,Fruit,g,5000.0,1000.0,0.05
+19,Pineapple,Fruit,g,3000.0,1000.0,0.08
+20,Banana,Fruit,pcs,80.0,20.0,5.0
+21,Milk,Dairy,ml,-4500.0,2000.0,0.06
+22,Ice Cream,Dairy,ml,2000.0,1000.0,0.25
+23,Oreo,Grocery,pcs,-60.0,20.0,5.0
+24,KitKat,Grocery,pcs,50.0,10.0,20.0
+25,Snickers,Grocery,pcs,50.0,10.0,40.0
+26,Avocado,Fruit,pcs,20.0,5.0,60.0
+27,Blueberry,Fruit,g,1000.0,200.0,1.5
+28,Frying Oil,Grocery,ml,11880.0,5000.0,0.15
+29,Tortilla Wrap,Bakery,pcs,100.0,20.0,10.0

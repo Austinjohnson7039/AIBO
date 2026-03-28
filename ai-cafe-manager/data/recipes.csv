@@ -1,0 +1,315 @@
+menu_item,ingredient,quantity_per_unit,unit
+FBC Beef Burger with Lime,Burger Bun,1.0,pcs
+FBC Beef Burger with Lime,Lettuce (Iceberg),20.0,g
+FBC Beef Burger with Lime,Onion,10.0,g
+FBC Beef Burger with Lime,Tomato,15.0,g
+FBC Beef Burger with Lime,Mayo,15.0,ml
+FBC Beef Burger with Lime,Minced Beef,120.0,g
+FBC Beef Burger with Lime,Lime,0.5,pcs
+FBC Chicken Burger with Lime,Burger Bun,1.0,pcs
+FBC Chicken Burger with Lime,Lettuce (Iceberg),20.0,g
+FBC Chicken Burger with Lime,Onion,10.0,g
+FBC Chicken Burger with Lime,Tomato,15.0,g
+FBC Chicken Burger with Lime,Mayo,15.0,ml
+FBC Chicken Burger with Lime,Chicken Breast,120.0,g
+FBC Chicken Burger with Lime,Zinger Sauce,20.0,ml
+FBC Chicken Burger with Lime,Lime,0.5,pcs
+FBC Zinger Burger with Lime,Burger Bun,1.0,pcs
+FBC Zinger Burger with Lime,Lettuce (Iceberg),20.0,g
+FBC Zinger Burger with Lime,Onion,10.0,g
+FBC Zinger Burger with Lime,Tomato,15.0,g
+FBC Zinger Burger with Lime,Mayo,15.0,ml
+FBC Zinger Burger with Lime,Chicken Breast,120.0,g
+FBC Zinger Burger with Lime,Zinger Sauce,20.0,ml
+FBC Zinger Burger with Lime,Lime,0.5,pcs
+FBC Veg Burger with Lime,Burger Bun,1.0,pcs
+FBC Veg Burger with Lime,Lettuce (Iceberg),20.0,g
+FBC Veg Burger with Lime,Onion,10.0,g
+FBC Veg Burger with Lime,Tomato,15.0,g
+FBC Veg Burger with Lime,Mayo,15.0,ml
+FBC Veg Burger with Lime,Potato,80.0,g
+FBC Veg Burger with Lime,Lime,0.5,pcs
+Loaded Fries Chicken,Potato,150.0,g
+Loaded Fries Chicken,Frying Oil,20.0,ml
+Loaded Fries Chicken,Mayo,30.0,ml
+Loaded Fries Chicken,Cheese Slice,1.0,pcs
+Loaded Fries Chicken,Chicken Breast,60.0,g
+Loaded Fries Zinger,Potato,150.0,g
+Loaded Fries Zinger,Frying Oil,20.0,ml
+Loaded Fries Zinger,Mayo,30.0,ml
+Loaded Fries Zinger,Cheese Slice,1.0,pcs
+Loaded Fries Zinger,Chicken Breast,60.0,g
+Loaded Fries Beef,Potato,150.0,g
+Loaded Fries Beef,Frying Oil,20.0,ml
+Loaded Fries Beef,Mayo,30.0,ml
+Loaded Fries Beef,Cheese Slice,1.0,pcs
+Loaded Fries Beef,Minced Beef,60.0,g
+French Fries Large,Potato,150.0,g
+French Fries Large,Frying Oil,20.0,ml
+Spicy French Fries,Potato,150.0,g
+Spicy French Fries,Frying Oil,20.0,ml
+Chicken Nuggets (8 pcs),Frying Oil,30.0,ml
+Chicken Nuggets (8 pcs),Chicken Breast,120.0,g
+Chicken Strips (8 pcs),Frying Oil,30.0,ml
+Chicken Strips (8 pcs),Chicken Breast,120.0,g
+Veg Nuggets (6 pcs),Frying Oil,30.0,ml
+Veg Nuggets (6 pcs),Potato,100.0,g
+Veg Burger Regular,Burger Bun,1.0,pcs
+Veg Burger Regular,Lettuce (Iceberg),20.0,g
+Veg Burger Regular,Onion,10.0,g
+Veg Burger Regular,Tomato,15.0,g
+Veg Burger Regular,Mayo,15.0,ml
+Veg Burger Regular,Potato,80.0,g
+Veg Cheese Burger,Burger Bun,1.0,pcs
+Veg Cheese Burger,Lettuce (Iceberg),20.0,g
+Veg Cheese Burger,Onion,10.0,g
+Veg Cheese Burger,Tomato,15.0,g
+Veg Cheese Burger,Mayo,15.0,ml
+Veg Cheese Burger,Potato,80.0,g
+Veg Cheese Burger,Cheese Slice,1.0,pcs
+Veg Double Cheese Burger,Burger Bun,1.0,pcs
+Veg Double Cheese Burger,Lettuce (Iceberg),20.0,g
+Veg Double Cheese Burger,Onion,10.0,g
+Veg Double Cheese Burger,Tomato,15.0,g
+Veg Double Cheese Burger,Mayo,15.0,ml
+Veg Double Cheese Burger,Potato,80.0,g
+Veg Double Cheese Burger,Cheese Slice,1.0,pcs
+Veg Double Cheese Burger,Potato,50.0,g
+Veg Burger Jumbo,Burger Bun,1.0,pcs
+Veg Burger Jumbo,Lettuce (Iceberg),20.0,g
+Veg Burger Jumbo,Onion,10.0,g
+Veg Burger Jumbo,Tomato,15.0,g
+Veg Burger Jumbo,Mayo,15.0,ml
+Veg Burger Jumbo,Potato,80.0,g
+Veg Burger Jumbo,Potato,50.0,g
+Veg Cheese Burger Jumbo,Burger Bun,1.0,pcs
+Veg Cheese Burger Jumbo,Lettuce (Iceberg),20.0,g
+Veg Cheese Burger Jumbo,Onion,10.0,g
+Veg Cheese Burger Jumbo,Tomato,15.0,g
+Veg Cheese Burger Jumbo,Mayo,15.0,ml
+Veg Cheese Burger Jumbo,Potato,80.0,g
+Veg Cheese Burger Jumbo,Cheese Slice,1.0,pcs
+Veg Cheese Burger Jumbo,Potato,50.0,g
+Veg Triple X Burger,Burger Bun,1.0,pcs
+Veg Triple X Burger,Lettuce (Iceberg),20.0,g
+Veg Triple X Burger,Onion,10.0,g
+Veg Triple X Burger,Tomato,15.0,g
+Veg Triple X Burger,Mayo,15.0,ml
+Veg Triple X Burger,Potato,80.0,g
+Veg Triple X Burger,Potato,100.0,g
+FBC Classic Chicken Burger,Burger Bun,1.0,pcs
+FBC Classic Chicken Burger,Lettuce (Iceberg),20.0,g
+FBC Classic Chicken Burger,Onion,10.0,g
+FBC Classic Chicken Burger,Tomato,15.0,g
+FBC Classic Chicken Burger,Mayo,15.0,ml
+FBC Classic Chicken Burger,Chicken Breast,120.0,g
+FBC Classic Chicken Burger,Zinger Sauce,20.0,ml
+FBC Classic Chicken Cheese Burger,Burger Bun,1.0,pcs
+FBC Classic Chicken Cheese Burger,Lettuce (Iceberg),20.0,g
+FBC Classic Chicken Cheese Burger,Onion,10.0,g
+FBC Classic Chicken Cheese Burger,Tomato,15.0,g
+FBC Classic Chicken Cheese Burger,Mayo,15.0,ml
+FBC Classic Chicken Cheese Burger,Chicken Breast,120.0,g
+FBC Classic Chicken Cheese Burger,Zinger Sauce,20.0,ml
+FBC Classic Chicken Cheese Burger,Cheese Slice,1.0,pcs
+FBC Chicken Jumbo Burger,Burger Bun,1.0,pcs
+FBC Chicken Jumbo Burger,Lettuce (Iceberg),20.0,g
+FBC Chicken Jumbo Burger,Onion,10.0,g
+FBC Chicken Jumbo Burger,Tomato,15.0,g
+FBC Chicken Jumbo Burger,Mayo,15.0,ml
+FBC Chicken Jumbo Burger,Chicken Breast,120.0,g
+FBC Chicken Jumbo Burger,Zinger Sauce,20.0,ml
+FBC Chicken Jumbo Burger,Chicken Breast,80.0,g
+FBC Chicken Triple X Burger,Burger Bun,1.0,pcs
+FBC Chicken Triple X Burger,Lettuce (Iceberg),20.0,g
+FBC Chicken Triple X Burger,Onion,10.0,g
+FBC Chicken Triple X Burger,Tomato,15.0,g
+FBC Chicken Triple X Burger,Mayo,15.0,ml
+FBC Chicken Triple X Burger,Chicken Breast,120.0,g
+FBC Chicken Triple X Burger,Zinger Sauce,20.0,ml
+FBC Chicken Triple X Burger,Chicken Breast,150.0,g
+FBC Chicken Special Burger,Burger Bun,1.0,pcs
+FBC Chicken Special Burger,Lettuce (Iceberg),20.0,g
+FBC Chicken Special Burger,Onion,10.0,g
+FBC Chicken Special Burger,Tomato,15.0,g
+FBC Chicken Special Burger,Mayo,15.0,ml
+FBC Chicken Special Burger,Chicken Breast,120.0,g
+FBC Chicken Special Burger,Zinger Sauce,20.0,ml
+Classic Beef Burger,Burger Bun,1.0,pcs
+Classic Beef Burger,Lettuce (Iceberg),20.0,g
+Classic Beef Burger,Onion,10.0,g
+Classic Beef Burger,Tomato,15.0,g
+Classic Beef Burger,Mayo,15.0,ml
+Classic Beef Burger,Minced Beef,120.0,g
+Classic Beef Cheese Burger,Burger Bun,1.0,pcs
+Classic Beef Cheese Burger,Lettuce (Iceberg),20.0,g
+Classic Beef Cheese Burger,Onion,10.0,g
+Classic Beef Cheese Burger,Tomato,15.0,g
+Classic Beef Cheese Burger,Mayo,15.0,ml
+Classic Beef Cheese Burger,Minced Beef,120.0,g
+Classic Beef Cheese Burger,Cheese Slice,1.0,pcs
+FBC Beef Jumbo Burger,Burger Bun,1.0,pcs
+FBC Beef Jumbo Burger,Lettuce (Iceberg),20.0,g
+FBC Beef Jumbo Burger,Onion,10.0,g
+FBC Beef Jumbo Burger,Tomato,15.0,g
+FBC Beef Jumbo Burger,Mayo,15.0,ml
+FBC Beef Jumbo Burger,Minced Beef,120.0,g
+FBC Beef Jumbo Burger,Minced Beef,80.0,g
+FBC Beef Triple X Burger,Burger Bun,1.0,pcs
+FBC Beef Triple X Burger,Lettuce (Iceberg),20.0,g
+FBC Beef Triple X Burger,Onion,10.0,g
+FBC Beef Triple X Burger,Tomato,15.0,g
+FBC Beef Triple X Burger,Mayo,15.0,ml
+FBC Beef Triple X Burger,Minced Beef,120.0,g
+FBC Beef Triple X Burger,Minced Beef,150.0,g
+FBC Zinger Burger,Burger Bun,1.0,pcs
+FBC Zinger Burger,Lettuce (Iceberg),20.0,g
+FBC Zinger Burger,Onion,10.0,g
+FBC Zinger Burger,Tomato,15.0,g
+FBC Zinger Burger,Mayo,15.0,ml
+FBC Zinger Burger,Chicken Breast,120.0,g
+FBC Zinger Burger,Zinger Sauce,20.0,ml
+FBC Zinger Cheese Burger,Burger Bun,1.0,pcs
+FBC Zinger Cheese Burger,Lettuce (Iceberg),20.0,g
+FBC Zinger Cheese Burger,Onion,10.0,g
+FBC Zinger Cheese Burger,Tomato,15.0,g
+FBC Zinger Cheese Burger,Mayo,15.0,ml
+FBC Zinger Cheese Burger,Chicken Breast,120.0,g
+FBC Zinger Cheese Burger,Zinger Sauce,20.0,ml
+FBC Zinger Cheese Burger,Cheese Slice,1.0,pcs
+FBC Mega Zinger Burger,Burger Bun,1.0,pcs
+FBC Mega Zinger Burger,Lettuce (Iceberg),20.0,g
+FBC Mega Zinger Burger,Onion,10.0,g
+FBC Mega Zinger Burger,Tomato,15.0,g
+FBC Mega Zinger Burger,Mayo,15.0,ml
+FBC Mega Zinger Burger,Chicken Breast,120.0,g
+FBC Mega Zinger Burger,Zinger Sauce,20.0,ml
+FBC Mega Zinger Burger,Chicken Breast,80.0,g
+Mixed Burger,Burger Bun,1.0,pcs
+Mixed Burger,Lettuce (Iceberg),20.0,g
+Mixed Burger,Onion,10.0,g
+Mixed Burger,Tomato,15.0,g
+Mixed Burger,Mayo,15.0,ml
+Mixed Cheese Burger,Burger Bun,1.0,pcs
+Mixed Cheese Burger,Lettuce (Iceberg),20.0,g
+Mixed Cheese Burger,Onion,10.0,g
+Mixed Cheese Burger,Tomato,15.0,g
+Mixed Cheese Burger,Mayo,15.0,ml
+Mixed Cheese Burger,Cheese Slice,1.0,pcs
+Smoked Classic Chicken Burger,Burger Bun,1.0,pcs
+Smoked Classic Chicken Burger,Lettuce (Iceberg),20.0,g
+Smoked Classic Chicken Burger,Onion,10.0,g
+Smoked Classic Chicken Burger,Tomato,15.0,g
+Smoked Classic Chicken Burger,Mayo,15.0,ml
+Smoked Classic Chicken Burger,Chicken Breast,120.0,g
+Smoked Classic Chicken Burger,Zinger Sauce,20.0,ml
+Smoked Chicken Jumbo Burger,Burger Bun,1.0,pcs
+Smoked Chicken Jumbo Burger,Lettuce (Iceberg),20.0,g
+Smoked Chicken Jumbo Burger,Onion,10.0,g
+Smoked Chicken Jumbo Burger,Tomato,15.0,g
+Smoked Chicken Jumbo Burger,Mayo,15.0,ml
+Smoked Chicken Jumbo Burger,Chicken Breast,120.0,g
+Smoked Chicken Jumbo Burger,Zinger Sauce,20.0,ml
+Smoked Chicken Jumbo Burger,Chicken Breast,80.0,g
+Smoked Classic Beef Burger,Burger Bun,1.0,pcs
+Smoked Classic Beef Burger,Lettuce (Iceberg),20.0,g
+Smoked Classic Beef Burger,Onion,10.0,g
+Smoked Classic Beef Burger,Tomato,15.0,g
+Smoked Classic Beef Burger,Mayo,15.0,ml
+Smoked Classic Beef Burger,Minced Beef,120.0,g
+Smoked Beef Jumbo Burger,Burger Bun,1.0,pcs
+Smoked Beef Jumbo Burger,Lettuce (Iceberg),20.0,g
+Smoked Beef Jumbo Burger,Onion,10.0,g
+Smoked Beef Jumbo Burger,Tomato,15.0,g
+Smoked Beef Jumbo Burger,Mayo,15.0,ml
+Smoked Beef Jumbo Burger,Minced Beef,120.0,g
+Smoked Beef Jumbo Burger,Minced Beef,80.0,g
+Veg Club Sandwich,Sandwich Bread,2.0,slice
+Veg Club Sandwich,Mayo,15.0,ml
+Veg Club Sandwich,Tomato,15.0,g
+Veg Club Sandwich,Lettuce (Iceberg),10.0,g
+Veg Club Sandwich,Potato,50.0,g
+Veg Club Cheese Sandwich,Sandwich Bread,2.0,slice
+Veg Club Cheese Sandwich,Mayo,15.0,ml
+Veg Club Cheese Sandwich,Tomato,15.0,g
+Veg Club Cheese Sandwich,Lettuce (Iceberg),10.0,g
+Veg Club Cheese Sandwich,Potato,50.0,g
+Veg Club Cheese Sandwich,Cheese Slice,1.0,pcs
+Zinger Club Sandwich,Sandwich Bread,2.0,slice
+Zinger Club Sandwich,Mayo,15.0,ml
+Zinger Club Sandwich,Tomato,15.0,g
+Zinger Club Sandwich,Lettuce (Iceberg),10.0,g
+Zinger Club Sandwich,Chicken Breast,80.0,g
+Chicken Club Sandwich,Sandwich Bread,2.0,slice
+Chicken Club Sandwich,Mayo,15.0,ml
+Chicken Club Sandwich,Tomato,15.0,g
+Chicken Club Sandwich,Lettuce (Iceberg),10.0,g
+Chicken Club Sandwich,Chicken Breast,80.0,g
+Beef Club Sandwich,Sandwich Bread,2.0,slice
+Beef Club Sandwich,Mayo,15.0,ml
+Beef Club Sandwich,Tomato,15.0,g
+Beef Club Sandwich,Lettuce (Iceberg),10.0,g
+Beef Club Sandwich,Minced Beef,80.0,g
+Snickers Milkshake,Milk,250.0,ml
+Snickers Milkshake,Ice Cream,100.0,ml
+Snickers Milkshake,Snickers,2.0,pcs
+KitKat Milkshake,Milk,250.0,ml
+KitKat Milkshake,Ice Cream,100.0,ml
+KitKat Milkshake,KitKat,2.0,pcs
+Ginger Lime,Lime,1.0,pcs
+Ginger Lime,Ginger,10.0,g
+Fresh Lime,Lime,2.0,pcs
+Watermelon Juice,Watermelon,300.0,g
+Pineapple Juice,Pineapple,250.0,g
+Orange Juice,Orange,3.0,pcs
+Apple Juice,Apple,2.0,pcs
+Grape Juice,Grape,250.0,g
+Oreo Shake,Milk,250.0,ml
+Oreo Shake,Ice Cream,100.0,ml
+Oreo Shake,Oreo,4.0,pcs
+Avocado Shake,Milk,250.0,ml
+Avocado Shake,Ice Cream,100.0,ml
+Avocado Shake,Avocado,0.5,pcs
+Sharjah Shake,Milk,250.0,ml
+Sharjah Shake,Ice Cream,100.0,ml
+Blueberry Shake,Milk,250.0,ml
+Blueberry Shake,Ice Cream,100.0,ml
+Blueberry Shake,Blueberry,40.0,g
+Vegetable Wrap,Tortilla Wrap,1.0,pcs
+Vegetable Wrap,Lettuce (Iceberg),30.0,g
+Vegetable Wrap,Onion,15.0,g
+Vegetable Wrap,Mayo,20.0,ml
+Vegetable Wrap,Potato,60.0,g
+Vegetable Wrap,Tomato,20.0,g
+Vegetable Cheese Wrap,Tortilla Wrap,1.0,pcs
+Vegetable Cheese Wrap,Lettuce (Iceberg),30.0,g
+Vegetable Cheese Wrap,Onion,15.0,g
+Vegetable Cheese Wrap,Mayo,20.0,ml
+Vegetable Cheese Wrap,Potato,60.0,g
+Vegetable Cheese Wrap,Tomato,20.0,g
+Vegetable Cheese Wrap,Cheese Slice,1.0,pcs
+Zinger Wrap,Tortilla Wrap,1.0,pcs
+Zinger Wrap,Lettuce (Iceberg),30.0,g
+Zinger Wrap,Onion,15.0,g
+Zinger Wrap,Mayo,20.0,ml
+Zinger Wrap,Chicken Breast,100.0,g
+Zinger Wrap,Zinger Sauce,15.0,ml
+Zinger Cheese Wrap,Tortilla Wrap,1.0,pcs
+Zinger Cheese Wrap,Lettuce (Iceberg),30.0,g
+Zinger Cheese Wrap,Onion,15.0,g
+Zinger Cheese Wrap,Mayo,20.0,ml
+Zinger Cheese Wrap,Chicken Breast,100.0,g
+Zinger Cheese Wrap,Zinger Sauce,15.0,ml
+Zinger Cheese Wrap,Cheese Slice,1.0,pcs
+Zinger Max Wrap,Tortilla Wrap,1.0,pcs
+Zinger Max Wrap,Lettuce (Iceberg),30.0,g
+Zinger Max Wrap,Onion,15.0,g
+Zinger Max Wrap,Mayo,20.0,ml
+Zinger Max Wrap,Chicken Breast,100.0,g
+Zinger Max Wrap,Zinger Sauce,15.0,ml
+Zinger Paneer Wrap,Tortilla Wrap,1.0,pcs
+Zinger Paneer Wrap,Lettuce (Iceberg),30.0,g
+Zinger Paneer Wrap,Onion,15.0,g
+Zinger Paneer Wrap,Mayo,20.0,ml
+Zinger Paneer Wrap,Chicken Breast,100.0,g
+Zinger Paneer Wrap,Zinger Sauce,15.0,ml
