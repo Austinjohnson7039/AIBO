@@ -33,17 +33,8 @@ async def lifespan(app: FastAPI):
     Replaces the deprecated @app.on_event("startup") pattern.
     """
     logger.info("Starting up %s v%s …", APP_TITLE, APP_VERSION)
-    
-    # 1. Run migrations (idempotent)
-    from migrate_db import migrate
-    try:
-        migrate()
-    except Exception as e:
-        logger.warning("Migration notice: %s", e)
-
-    # 2. Init DB and load data
     init_db()
-    load_data()
+    # load_data() - Disabled for Multi-Tenant SaaS migration
     logger.info("Startup complete. Server is ready.")
     yield
     logger.info("Shutting down %s.", APP_TITLE)
@@ -59,14 +50,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Enable CORS for cross-origin access (Streamlit/React <-> FastAPI)
+# Enable CORS for cross-origin access (Streamlit <-> FastAPI)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # For production, we can refine this to specific domains
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ─── Routers ──────────────────────────────────────────────────────────────────
-app.include_router(router)
+app.include_router(router, prefix="/api")

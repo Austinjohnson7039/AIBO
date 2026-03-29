@@ -1,86 +1,195 @@
-import { useState } from 'react'
-import ChatTab from '../components/ChatTab.jsx'
-import DashboardTab from '../components/DashboardTab.jsx'
-import GroceryTab from '../components/GroceryTab.jsx'
-import PredictTab from '../components/PredictTab.jsx'
+import { useState, useEffect } from 'react';
+import ChatTab from '../components/ChatTab';
+import DashboardTab from '../components/DashboardTab';
+import GroceryTab from '../components/GroceryTab';
+import PredictTab from '../components/PredictTab';
+import SmartMenuTab from '../components/SmartMenuTab';
+import StaffTab from '../components/StaffTab';
+import Onboarding from '../components/Onboarding';
+import { login, signup } from '../api.js';
 
 const TABS = [
-  { id: 'chat',      icon: '◈', label: 'Cafe Assistant' },
-  { id: 'dashboard', icon: '⬡', label: 'Sales Dashboard' },
-  { id: 'grocery',   icon: '⊞', label: 'Ingredients' },
-  { id: 'predict',   icon: '◉', label: 'Forecasting' },
-]
+  { id: 'chat',      label: 'AI Assistant', icon: '✨' },
+  { id: 'dashboard', label: 'Dashboard', icon: '☕' },
+  { id: 'grocery',   label: 'Ingredients', icon: '🧺' },
+  { id: 'predict',   label: 'Forecast', icon: '📊' },
+  { id: 'smart-menu',label: 'Menu', icon: '📋' },
+  { id: 'staff',     label: 'Staff Settings', icon: '👥' },
+];
 
-const META = {
-  chat:      { h: 'Cafe Assistant',    sub: 'Natural language business intelligence.' },
-  dashboard: { h: 'Sales Overview',   sub: 'Revenue KPIs and top performers.' },
-  grocery:   { h: 'Ingredient Stock', sub: 'Raw material management and alerts.' },
-  predict:   { h: 'AI Forecasting',   sub: 'Procurement needs and sales trends.' },
-}
+export default function Dashboard() {
+  const [token, setToken] = useState(localStorage.getItem('aibo_token'));
+  const [view, setView] = useState('chat');
+  const [authView, setAuthView] = useState('login');
+  const [authData, setAuthData] = useState({ email: '', password: '', name: '', location: 'Bengaluru' });
+  const [error, setError] = useState('');
+  const [theme, setTheme] = useState(localStorage.getItem('aibo_theme') || 'dark');
+  const [onboarding, setOnboarding] = useState(false);
 
-export default function Dashboard({ onLogout, theme, toggleTheme }) {
-  const [tab, setTab] = useState('chat')
-  const m = META[tab]
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('aibo_theme', theme);
+  }, [theme]);
 
-  return (
-    <div className="layout">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="s-brand">
-          <div className="s-brand-mark">☕</div>
-          <div>
-            <div className="s-brand-name">AIBO</div>
-            <div className="s-brand-sub">Cafe Intelligence</div>
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    try {
+      const res = await login(authData.email, authData.password);
+      localStorage.setItem('aibo_token', res.access_token);
+      setToken(res.access_token);
+    } catch {
+      setError('Invalid email or password. Please try again.');
+    }
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setError('');
+    try {
+      await signup(authData);
+      // Auto-login after successful signup to trigger the onboarding wizard immediately
+      const res = await login(authData.email, authData.password);
+      localStorage.setItem('aibo_token', res.access_token);
+      setToken(res.access_token);
+      setOnboarding(true);
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Signup failed.');
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('aibo_token');
+    setToken(null);
+  };
+
+  // ── Auth Screen ──
+  if (!token) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card">
+          <div style={{ textAlign: 'center', marginBottom: 8 }}>
+            <span style={{ fontSize: 36 }}>☕</span>
           </div>
-        </div>
+          <h1 className="brand-title">AIBO</h1>
+          <p className="brand-sub">AI-Powered Café Manager</p>
 
-        <nav className="s-nav">
-          <div className="s-section">Navigation</div>
-          {TABS.map(t => (
+          <div className="auth-tabs">
+            <button className={`auth-tab ${authView === 'login' ? 'active' : ''}`} onClick={() => { setAuthView('login'); setError(''); }}>Sign In</button>
+            <button className={`auth-tab ${authView === 'signup' ? 'active' : ''}`} onClick={() => { setAuthView('signup'); setError(''); }}>Register</button>
+          </div>
+
+          <form onSubmit={authView === 'login' ? handleLogin : handleSignup}>
+            {authView === 'signup' && (
+              <div className="form-group">
+                <label className="form-label">Café Name</label>
+                <input className="input" placeholder="e.g. Brew & Bloom" onChange={e => setAuthData({...authData, name: e.target.value})} required />
+              </div>
+            )}
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input className="input" type="email" placeholder="you@cafe.com" onChange={e => setAuthData({...authData, email: e.target.value})} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <input className="input" type="password" placeholder="••••••••" onChange={e => setAuthData({...authData, password: e.target.value})} required />
+            </div>
+            {authView === 'signup' && (
+              <div className="form-group">
+                <label className="form-label">City</label>
+                <select className="select" onChange={e => setAuthData({...authData, location: e.target.value})}>
+                  <option>Bengaluru</option><option>Mumbai</option><option>Delhi</option><option>Pune</option><option>Chennai</option>
+                </select>
+              </div>
+            )}
+
+            {error && <div className="badge badge-danger" style={{ width: '100%', padding: '10px 14px', marginBottom: 16, justifyContent: 'center' }}>{error}</div>}
+
+            <button className="btn btn-primary" style={{ width: '100%', padding: 12 }}>
+              {authView === 'login' ? 'Sign In' : 'Create Account'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (onboarding) {
+    return <Onboarding onComplete={() => setOnboarding(false)} />;
+  }
+
+  // ── Main App ──
+  return (
+    <div className="app-layout">
+      {/* Sidebar — desktop only */}
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          <h1>☕ AIBO</h1>
+          <p>Café Intelligence</p>
+        </div>
+        <nav className="sidebar-nav">
+          {TABS.map(tab => (
             <button
-              key={t.id}
-              id={`nav-${t.id}`}
-              className={`s-item${tab === t.id ? ' active' : ''}`}
-              onClick={() => setTab(t.id)}
+              key={tab.id}
+              className={`nav-item ${view === tab.id ? 'active' : ''}`}
+              onClick={() => setView(tab.id)}
             >
-              <span className="s-icon">{t.icon}</span>
-              <span>{t.label}</span>
+              <span className="nav-icon">{tab.icon}</span>
+              {tab.label}
             </button>
           ))}
         </nav>
-
-        <div className="s-footer">
-          <button className="s-footer-btn" onClick={toggleTheme}>
-            <span>{theme === 'dark' ? '☀' : '⏾'}</span>
-            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-          </button>
-          <button className="s-footer-btn danger" onClick={onLogout}>
-            <span>↩</span>
-            <span>Sign out</span>
+        <div style={{ paddingTop: 16, borderTop: '1px solid var(--border-subtle)', marginTop: 'auto' }}>
+          <button className="nav-item" style={{ color: 'var(--text-dim)' }} onClick={logout}>
+            <span className="nav-icon">🚪</span> Log Out
           </button>
         </div>
       </aside>
 
-      {/* Main */}
-      <div className="content">
-        <header className="topbar">
-          <div className="topbar-left">
-            <h1>{m.h}</h1>
-            <div className="topbar-sub">{m.sub}</div>
+      {/* Main Content */}
+      <main className="main-content">
+        <header className="page-header">
+          <div>
+            <h1>{TABS.find(t => t.id === view)?.icon} {TABS.find(t => t.id === view)?.label}</h1>
+            <p className="page-header-sub">Manage your café with AI</p>
           </div>
-          <div className="topbar-right topbar-status">
-            <span className="pulse" />
-            <span>AI Online</span>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <button className="btn btn-ghost" style={{ padding: '6px 10px', fontSize: 16, border: 'none' }} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+            <div className="status-pill">
+              <span className="status-dot" />
+              Online
+            </div>
           </div>
         </header>
 
-        <div className="page">
-          {tab === 'chat'      && <ChatTab />}
-          {tab === 'dashboard' && <DashboardTab />}
-          {tab === 'grocery'   && <GroceryTab />}
-          {tab === 'predict'   && <PredictTab />}
+        <section className="fade-in" key={view}>
+          {view === 'dashboard' && <DashboardTab />}
+          {view === 'chat' && <ChatTab />}
+          {view === 'grocery' && <GroceryTab />}
+          {view === 'predict' && <PredictTab />}
+          {view === 'smart-menu' && <SmartMenuTab />}
+          {view === 'staff' && <StaffTab />}
+        </section>
+      </main>
+
+      {/* Mobile Bottom Tabs */}
+      <div className="mobile-tabs">
+        <div className="mobile-tabs-inner">
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              className={`mobile-tab ${view === tab.id ? 'active' : ''}`}
+              onClick={() => setView(tab.id)}
+            >
+              <span className="tab-icon">{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
     </div>
-  )
+  );
 }

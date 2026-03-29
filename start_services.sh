@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Start FastAPI in the background
-echo "Starting FastAPI Backend on port ${PORT:-8001}..."
-python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8001} &
+echo "Starting FastAPI Backend on port 8001..."
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8001 &
 
 # Start the Automated Sales Sync Watcher in the background
 echo "Starting Sales Sync Watcher..."

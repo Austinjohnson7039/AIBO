@@ -1,54 +1,73 @@
-"""
-routes.py
-─────────
-All API route definitions for the AI Cafe Manager.
-Import this router in main.py and mount it on the FastAPI app.
-"""
-
-from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks
+from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import StreamingResponse
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from app.services.orchestrator import Orchestrator
+from typing import List, Optional
 import io
+import os
+import pandas as pd
 
-# Instantiate the global orchestrator instance
-orchestrator = Orchestrator()
-
-router = APIRouter(redirect_slashes=False)
-
-class QueryRequest(BaseModel):
-    query: str
-
-@router.get("/", tags=["Health"])
-async def root() -> dict:
-    """Health-check endpoint — confirms the server is running."""
-    return {"message": "AI Cafe Manager Running 🚀"}
-
-@router.post("/query/", tags=["AI"])
-@router.post("/query", tags=["AI"])
-async def run_query(req: QueryRequest) -> dict:
-    """Orchestrator entry point evaluating queries."""
-    # Defers the handling strictly to the multi-agent backend 
-    return orchestrator.handle(req.query)
-
+from app.db.database import get_db
+from app.db.models import Tenant, Sale, Inventory, Ingredient, Vendor, PurchaseOrder, Recipe
+from app.api.auth import get_current_tenant, get_password_hash, verify_password, create_access_token
 from app.services.stock_engine import stock_engine
+from app.services.forecasting_engine import forecasting_engine
+from app.services.procurement_agent import run_procurement_cycle
+from app.services.menu_agent import menu_agent
+from app.services.excel_parser import fuzzy_map_columns
+
+router = APIRouter() # Allow FastAPI to handle slashes naturally
+
+# ─── Auth Routes ──────────────────────────────────────────────────────────────
+
+class SignupRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+    location: str = "Bengaluru"
+
+@router.post("/auth/signup", tags=["Auth"])
+async def signup(req: SignupRequest, db: Session = Depends(get_db)):
+    if db.query(Tenant).filter(Tenant.email == req.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    new_tenant = Tenant(
+        name=req.name,
+        email=req.email,
+        password_hash=get_password_hash(req.password),
+        location=req.location
+    )
+    db.add(new_tenant)
+    db.commit()
+    db.refresh(new_tenant)
+    return {"message": "Cafe registered successfully", "id": new_tenant.id}
+
+@router.post("/auth/login", tags=["Auth"])
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    tenant = db.query(Tenant).filter(Tenant.email == form_data.username).first()
+    if not tenant or not verify_password(form_data.password, tenant.password_hash):
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
+    
+    access_token = create_access_token(data={"sub": tenant.email})
+    return {"access_token": access_token, "token_type": "bearer", "cafe_name": tenant.name}
+
+# ─── Dashboard & Stock ────────────────────────────────────────────────────────
 
 @router.get("/dashboard/", tags=["Dashboard"])
-async def get_dashboard() -> dict:
-    """Returns analytics and alerts for the UI Dashboard."""
-    return stock_engine.get_dashboard_data()
+async def get_dashboard(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    return stock_engine.get_dashboard_data(db, tenant.id)
 
 class RestockRequest(BaseModel):
     ingredient_name: str
     added_amount: float
 
 @router.post("/grocery/restock/", tags=["Grocery"])
-async def restock_grocery(req: RestockRequest) -> dict:
-    """Manually add stock to an ingredient."""
-    success = stock_engine.restock_item(req.ingredient_name, req.added_amount)
+async def restock_grocery(req: RestockRequest, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    success = stock_engine.restock_item(db, tenant.id, req.ingredient_name, req.added_amount)
     if success:
         return {"status": "success", "message": f"Added {req.added_amount} to {req.ingredient_name}"}
-    return {"status": "error", "message": f"Ingredient '{req.ingredient_name}' not found."}
+    return {"status": "error", "message": "Ingredient not found."}
 
 class AddGroceryRequest(BaseModel):
     ingredient_name: str
@@ -59,123 +78,158 @@ class AddGroceryRequest(BaseModel):
     unit_cost_inr: float
 
 @router.post("/grocery/add/", tags=["Grocery"])
-async def add_grocery(req: AddGroceryRequest) -> dict:
-    """Manually add a new grocery item to the database."""
-    success, msg = stock_engine.add_grocery_item(
-        req.ingredient_name, req.category, req.unit, 
-        req.current_stock, req.reorder_level, req.unit_cost_inr
-    )
-    if success:
-        return {"status": "success", "message": msg}
-    return {"status": "error", "message": msg}
-
-class RemoveGroceryRequest(BaseModel):
-    ingredient_name: str
+async def add_grocery(req: AddGroceryRequest, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    success, msg = stock_engine.add_grocery_item(db, tenant.id, req)
+    return {"status": "success" if success else "error", "message": msg}
 
 @router.delete("/grocery/remove/", tags=["Grocery"])
-async def remove_grocery(req: RemoveGroceryRequest) -> dict:
-    """Remove a grocery item from the database."""
-    success, msg = stock_engine.remove_grocery_item(req.ingredient_name)
-    if success:
-        return {"status": "success", "message": msg}
-    return {"status": "error", "message": msg}
+async def remove_grocery(ingredient_name: str, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    success, msg = stock_engine.remove_grocery_item(db, tenant.id, ingredient_name)
+    return {"status": "success" if success else "error", "message": msg}
 
-from app.services.forecasting_engine import forecasting_engine
+# ─── Analytics & Smart Menu ───────────────────────────────────────────────────
 
 @router.get("/analytics/forecast/", tags=["Analytics"])
-async def get_forecast() -> dict:
-    """Returns inventory runway and smart shopping list."""
-    return forecasting_engine.get_inventory_forecast()
+async def get_forecast(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    return forecasting_engine.get_inventory_forecast(db, tenant.id)
+
+@router.get("/analytics/smart-menu/", tags=["Analytics"])
+async def get_smart_menu(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    recs = await menu_agent.generate_recommendations(db, tenant)
+    return {"recommendations": recs, "location": tenant.location}
 
 @router.get("/analytics/trends/", tags=["Analytics"])
-async def get_trends() -> dict:
-    """Returns marketing insights and item momentum."""
-    return forecasting_engine.get_marketing_insights()
+async def get_trends(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    return forecasting_engine.get_marketing_insights(db, tenant.id)
 
-import os
-import pandas as pd
-from app.db.ops_helpers import record_sale_op
+from app.agents.manager import ManagerAgent
+from app.agents.analyst import AnalystAgent
+from app.agents.operations import OperationsAgent
 
-@router.post("/sync/manual/", tags=["Sync"])
-async def trigger_manual_sync() -> dict:
-    """Manually triggers processing of any CSVs in 'incoming' folder."""
-    WATCH_DIR = "data/sync/incoming"
-    files = [f for f in os.listdir(WATCH_DIR) if f.endswith('.csv')]
-    if not files:
-        return {"status": "info", "message": "No new files to sync."}
+manager_agent = ManagerAgent()
+analyst_agent = AnalystAgent()
+operations_agent = OperationsAgent()
+
+class QueryRequest(BaseModel):
+    query: str
+
+@router.post("/query/", tags=["AI"])
+async def query_ai(req: QueryRequest, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    """
+    Agentic RAG Node: Routes and processes business intelligence and operational queries.
+    """
+    # 1. Classify intent
+    intent = manager_agent.decide_agent(req.query)
     
-    for f in files:
-        path = os.path.join(WATCH_DIR, f)
-        df = pd.read_csv(path)
-        for _, row in df.iterrows():
-            record_sale_op(str(row['item']), int(row['quantity']), float(row['revenue']))
-            stock_engine.deduct_sale(str(row['item']), int(row['quantity']))
-        
-        os.rename(path, os.path.join("data/sync/archive", f"manual_{f}"))
+    # 2. Process based on intent
+    if intent == 'analyst':
+        res = analyst_agent.analyze(req.query, tenant.id)
+        return {
+            "response": res["answer"],
+            "evaluation": {"score": 9, "safe": True},
+            "sources": res.get("sources", [])
+        }
     
-    from app.db.sync import sync_to_csv
-    sync_to_csv()
-    return {"status": "success", "message": f"Processed {len(files)} files manually."}
+    if intent == 'operations':
+        # Parse the action
+        action_json = operations_agent.parse_action(req.query)
+        # Execute the action
+        result_msg = operations_agent.execute_action(db, tenant.id, action_json)
+        return {
+            "response": result_msg,
+            "evaluation": {"score": 9, "safe": True},
+            "sources": ["Operations Hub"]
+        }
+    
+    # For 'support' and any other intent, use the analyst as a general assistant
+    res = analyst_agent.analyze(req.query, tenant.id)
+    return {
+        "response": res["answer"],
+        "evaluation": {"score": 8, "safe": True},
+        "sources": res.get("sources", [])
+    }
 
-from app.services.excel_parser import fuzzy_map_columns
-from app.services.procurement_agent import run_procurement_cycle
+# ─── Sync (POS Upload) ────────────────────────────────────────────────────────
 
 @router.post("/sync/upload/excel", tags=["Sync"])
-async def upload_excel_sales(background_tasks: BackgroundTasks, file: UploadFile = File(...)) -> dict:
-    """Uploads Excel daily sales, updates inventory, and triggers the Procure framework autonomously."""
+async def upload_excel_sales(
+    background_tasks: BackgroundTasks, 
+    file: UploadFile = File(...), 
+    tenant: Tenant = Depends(get_current_tenant), 
+    db: Session = Depends(get_db)
+):
     if not file.filename.endswith(('.xlsx', '.xls')):
-        raise HTTPException(status_code=400, detail="Ensure the file is a valid Excel format.")
-        
+        raise HTTPException(status_code=400, detail="Invalid file type.")
+    
     contents = await file.read()
     try:
-        raw_df = pd.read_excel(io.BytesIO(contents))
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Corrupted Excel file: {str(e)}")
-        
-    try:
-        clean_df = fuzzy_map_columns(raw_df)
-    except Exception as e:
+        df = pd.read_excel(io.BytesIO(contents))
+        clean_df = fuzzy_map_columns(df)
+    except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Could not read the uploaded Excel file. Please download the template and try again.")
+    
     processed = 0
-    from app.db.ops_helpers import record_sale_op
     for _, row in clean_df.iterrows():
-        try:
-            item = str(row['item']).strip()
-            qty = int(row['quantity'])
-            rev = float(row['revenue'])
-            record_sale_op(item, qty, rev)
-            stock_engine.deduct_sale(item, qty)
-            processed += 1
-        except Exception:
-            pass 
-            
-    # Autonomous Triggering via Background Task thread!
-    background_tasks.add_task(run_procurement_cycle)
+        stock_engine.record_sale_and_deduct(db, tenant.id, str(row['item']), int(row['quantity']), float(row['revenue']))
+        processed += 1
     
-    return {"status": "success", "message": f"Successfully parsed {processed} transaction rows. Autonomous agent deployed in background to verify safety stock."}
+    background_tasks.add_task(run_procurement_cycle, db, tenant.id)
+    return {"status": "success", "message": f"Processed {processed} sales. Agent triggered."}
 
-@router.get("/sync/export/sales", tags=["Sync"])
-async def export_sales_excel():
-    """Builds a live Excel analytical report from the database and streams it to the user."""
-    grocery, recipes, sales = stock_engine.load_data()
-    
-    if sales.empty:
-        raise HTTPException(status_code=404, detail="No historical sales to export.")
-        
+@router.get("/sync/template", tags=["Sync"])
+async def download_excel_template():
+    """Provides a fresh, perfectly formatted POS upload template for new cafe owners."""
+    df = pd.DataFrame([
+        {"Date (Optional)": "2026-03-30", "Product Name": "Example Burger", "Units Sold": "10", "Total Sales (INR)": "3500.00"},
+        {"Date (Optional)": "2026-03-30", "Product Name": "Vanilla Latte", "Units Sold": "45", "Total Sales (INR)": "9000.00"}
+    ])
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        sales['date_only'] = pd.to_datetime(sales['sale_date']).dt.date
-        sales.to_excel(writer, index=False, sheet_name='All Sales Logs')
-        grocery.to_excel(writer, index=False, sheet_name='Live Stocks Tracker')
-        
+        df.to_excel(writer, index=False, sheet_name='Sales_Template')
     output.seek(0)
     
-    headers = {'Content-Disposition': 'attachment; filename="AIBO_Premium_Sales_Report.xlsx"'}
+    headers = {
+        'Content-Disposition': 'attachment; filename="AIBO_Sales_Template.xlsx"'
+    }
     return StreamingResponse(output, headers=headers, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
-from app.db.models import Vendor
-from app.db.database import SessionLocal
+@router.get("/sync/export/sales", tags=["Sync"])
+async def export_sales(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    """Exports all historical sales for the logged-in cafe to an Excel document offline."""
+    sales = db.query(Sale).filter(Sale.tenant_id == tenant.id).all()
+    
+    if not sales:
+        data = [{"Date": "N/A", "Item Name": "No Data", "Quantity Sold": 0, "Total Sales (INR)": 0}]
+    else:
+        data = [{
+            "Date": s.sale_date.strftime("%Y-%m-%d %H:%M:%S") if s.sale_date else "",
+            "Item Name": s.item,
+            "Quantity Sold": s.quantity,
+            "Total Sales (INR)": s.revenue
+        } for s in sales]
+        
+    df = pd.DataFrame(data)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sales_Export')
+    output.seek(0)
+    
+    # Clean filename by stripping spaces
+    safe_name = "".join([c for c in tenant.name if c.isalpha() or c.isdigit() or c==' ']).rstrip().replace(" ", "_")
+    
+    headers = {
+        'Content-Disposition': f'attachment; filename="AIBO_{safe_name}_Export.xlsx"'
+    }
+    return StreamingResponse(output, headers=headers, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+# ─── Vendors & Procurement ────────────────────────────────────────────────────
+
+@router.get("/vendors/", tags=["Procurement"])
+async def list_vendors(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    vendors = db.query(Vendor).filter(Vendor.tenant_id == tenant.id).all()
+    return {"vendors": vendors}
 
 class VendorRequest(BaseModel):
     name: str
@@ -184,37 +238,121 @@ class VendorRequest(BaseModel):
     category: str
 
 @router.post("/vendors/add/", tags=["Procurement"])
-async def add_vendor(req: VendorRequest) -> dict:
-    db = SessionLocal()
-    try:
-        new_v = Vendor(
-            name=req.name,
-            contact_name=req.contact_name,
-            whatsapp_number=req.whatsapp_number,
-            category=req.category
-        )
-        db.add(new_v)
-        db.commit()
-        return {"status": "success", "message": f"Partnered with {req.name}"}
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
-    finally:
-        db.close()
-
-@router.get("/vendors/", tags=["Procurement"])
-async def list_vendors() -> dict:
-    db = SessionLocal()
-    try:
-        vendors = db.query(Vendor).all()
-        return {"vendors": [{"id": v.id, "name": v.name, "contact": v.contact_name, "whatsapp": v.whatsapp_number, "category": v.category} for v in vendors]}
-    finally:
-        db.close()
+async def add_vendor(req: VendorRequest, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    v = Vendor(tenant_id=tenant.id, **req.dict())
+    db.add(v)
+    db.commit()
+    return {"status": "success", "message": f"Added vendor {v.name}"}
 
 @router.post("/procurement/trigger", tags=["Procurement"])
-async def trigger_procurement() -> dict:
-    """Manually forces AIBO to analyze burn rates and batch-send Purchase Orders."""
-    result = run_procurement_cycle()
-    if "error" in result:
-        raise HTTPException(status_code=400, detail=result["message"])
-    return result
+async def trigger_procurement(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    return run_procurement_cycle(db, tenant.id)
+
+# ─── Employee Management & Shifts ─────────────────────────────────────────────
+
+from app.db.models import Employee, Attendance, Wastage, Batch
+from datetime import datetime
+
+class EmployeeRequest(BaseModel):
+    name: str
+    role: str
+    hourly_rate: float
+    shift_start: Optional[str] = None
+    shift_end: Optional[str] = None
+
+@router.get("/staff/", tags=["Staff"])
+async def list_staff(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    employees = db.query(Employee).filter(Employee.tenant_id == tenant.id).all()
+    return {"employees": employees}
+
+@router.post("/staff/add/", tags=["Staff"])
+async def add_staff(req: EmployeeRequest, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    e = Employee(tenant_id=tenant.id, **req.dict())
+    db.add(e)
+    db.commit()
+    return {"status": "success", "message": f"Added employee {e.name}"}
+
+@router.post("/staff/clock-in/{employee_id}", tags=["Staff"])
+async def clock_in(employee_id: int, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    # Simple clock in
+    new_att = Attendance(
+        tenant_id=tenant.id,
+        employee_id=employee_id,
+        date=datetime.utcnow(),
+        check_in=datetime.utcnow()
+    )
+    db.add(new_att)
+    db.commit()
+    return {"status": "success", "message": "Clocked in successfully."}
+
+@router.post("/staff/clock-out/{employee_id}", tags=["Staff"])
+async def clock_out(employee_id: int, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    att = db.query(Attendance).filter(
+        Attendance.tenant_id == tenant.id, 
+        Attendance.employee_id == employee_id,
+    ).order_by(Attendance.id.desc()).first()
+    
+    if not att or att.check_out:
+        return {"status": "error", "message": "Not clocked in."}
+        
+    att.check_out = datetime.utcnow()
+    diff = att.check_out - att.check_in
+    att.total_hours = diff.total_seconds() / 3600.0
+    db.commit()
+    return {"status": "success", "message": "Clocked out.", "hours": round(att.total_hours, 2)}
+
+@router.get("/staff/salaries/", tags=["Staff"])
+async def get_salaries(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    employees = db.query(Employee).filter(Employee.tenant_id == tenant.id).all()
+    salaries = []
+    for e in employees:
+        atts = db.query(Attendance).filter(Attendance.employee_id == e.id).all()
+        total_hrs = sum(a.total_hours for a in atts)
+        salaries.append({
+            "employee_id": e.id,
+            "name": e.name,
+            "role": e.role,
+            "total_hours": round(total_hrs, 2),
+            "salary": round(total_hrs * e.hourly_rate, 2)
+        })
+    return {"salaries": salaries}
+
+# ─── Wastage & Expiry ─────────────────────────────────────────────────────────
+
+class WastageRequest(BaseModel):
+    item_name: str
+    quantity: float
+    loss_amount: float
+    reason: str = "expired"
+
+@router.post("/wastage/add/", tags=["Wastage"])
+async def add_wastage(req: WastageRequest, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    w = Wastage(tenant_id=tenant.id, **req.dict())
+    
+    # Optional logic: Deduct from ingredient stock
+    ing = db.query(Ingredient).filter(Ingredient.tenant_id == tenant.id, Ingredient.ingredient_name == req.item_name).first()
+    if ing:
+        ing.current_stock -= req.quantity
+    
+    db.add(w)
+    db.commit()
+    return {"status": "success", "message": "Wastage logged."}
+
+@router.get("/wastage/", tags=["Wastage"])
+async def get_wastage(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    wastage = db.query(Wastage).filter(Wastage.tenant_id == tenant.id).order_by(Wastage.logged_at.desc()).all()
+    return {"wastage": wastage}
+
+@router.get("/analytics/staffing-recommendation/", tags=["Analytics"])
+async def get_staffing_recs(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    # AI logic representing the upgrade
+    sales = db.query(Sale).filter(Sale.tenant_id == tenant.id).all()
+    # Basic logic to recommend reducing staff if we don't have many recent sales
+    num_sales = len(sales)
+    
+    if num_sales < 10:
+        alert = "Reduce 1 staff during slow hours"
+    else:
+        alert = "Traffic is normal. Current staffing is optimal."
+        
+    return {"recommendation": alert}

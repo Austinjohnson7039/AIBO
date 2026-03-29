@@ -3,19 +3,36 @@ from datetime import datetime
 from app.db.database import Base
 
 
+class Tenant(Base):
+    """Represents a café / business entity in the SaaS platform."""
+
+    __tablename__ = "tenants"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    password_hash = Column(String, nullable=False)
+    location = Column(String, nullable=True, default="Bengaluru")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self) -> str:
+        return f"<Tenant id={self.id} name={self.name!r} loc={self.location!r}>"
+
+
 class Sale(Base):
     """Represents a single sales transaction line."""
 
     __tablename__ = "sales"
 
     id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
     item = Column(String, nullable=False)
     quantity = Column(Integer, nullable=False)
     revenue = Column(Float, nullable=False)
     sale_date = Column(DateTime, default=datetime.utcnow)
 
     def __repr__(self) -> str:
-        return f"<Sale id={self.id} item={self.item!r} qty={self.quantity} rev={self.revenue} date={self.sale_date}>"
+        return f"<Sale id={self.id} tenant={self.tenant_id} item={self.item!r} qty={self.quantity} rev={self.revenue} date={self.sale_date}>"
 
 
 class Inventory(Base):
@@ -23,8 +40,9 @@ class Inventory(Base):
 
     __tablename__ = "inventory"
 
-    id = Column(Integer, primary_key=True, index=True) # Maps to Item_ID
-    item_name = Column(String, nullable=False, unique=True)
+    id = Column(Integer, primary_key=True, index=True) 
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
+    item_name = Column(String, nullable=False)
     category = Column(String, nullable=True)
     item_type = Column(String, nullable=True)
     unit = Column(String, nullable=True)
@@ -34,8 +52,9 @@ class Inventory(Base):
     cost_price = Column(Float, nullable=False, default=0.0)
     selling_price = Column(Float, nullable=False, default=0.0)
 
+    # Note: item_name is unique per tenant locally, but not globally
     def __repr__(self) -> str:
-        return f"<Inventory id={self.id} name={self.item_name!r} stock={self.stock}>"
+        return f"<Inventory id={self.id} tenant={self.tenant_id} name={self.item_name!r} stock={self.stock}>"
 
 
 class Ingredient(Base):
@@ -44,7 +63,8 @@ class Ingredient(Base):
     __tablename__ = "ingredients"
 
     id = Column(Integer, primary_key=True, index=True)
-    ingredient_name = Column(String, nullable=False, unique=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
+    ingredient_name = Column(String, nullable=False)
     category = Column(String, nullable=True)
     unit = Column(String, nullable=True)
     current_stock = Column(Float, nullable=False, default=0.0)
@@ -53,7 +73,7 @@ class Ingredient(Base):
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=True)
 
     def __repr__(self) -> str:
-        return f"<Ingredient id={self.id} name={self.ingredient_name!r} stock={self.current_stock}>"
+        return f"<Ingredient id={self.id} tenant={self.tenant_id} name={self.ingredient_name!r} stock={self.current_stock}>"
 
 
 class Vendor(Base):
@@ -62,13 +82,14 @@ class Vendor(Base):
     __tablename__ = "vendors"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False, unique=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
+    name = Column(String, nullable=False)
     contact_name = Column(String, nullable=True)
     whatsapp_number = Column(String, nullable=True)
     category = Column(String, nullable=True) # e.g., 'Dairy', 'Coffee Roaster'
 
     def __repr__(self) -> str:
-        return f"<Vendor id={self.id} name={self.name!r}>"
+        return f"<Vendor id={self.id} tenant={self.tenant_id} name={self.name!r}>"
 
 
 class PurchaseOrder(Base):
@@ -77,6 +98,7 @@ class PurchaseOrder(Base):
     __tablename__ = "purchase_orders"
 
     id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
     status = Column(String, nullable=False, default="SENT")
     items_json = Column(Text, nullable=False) # Stores stringified array of ordered items
@@ -93,10 +115,79 @@ class Recipe(Base):
     __tablename__ = "recipes"
 
     id = Column(Integer, primary_key=True, index=True)
-    menu_item = Column(String, nullable=False) # Maps to Inventory.item_name
-    ingredient = Column(String, nullable=False) # Maps to Ingredient.ingredient_name
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
+    menu_item = Column(String, nullable=False) 
+    ingredient = Column(String, nullable=False) 
     quantity_per_unit = Column(Float, nullable=False)
     unit = Column(String, nullable=True)
 
     def __repr__(self) -> str:
-        return f"<Recipe id={self.id} menu={self.menu_item!r} ing={self.ingredient!r} qty={self.quantity_per_unit}>"
+        return f"<Recipe id={self.id} tenant={self.tenant_id} menu={self.menu_item!r} ing={self.ingredient!r} qty={self.quantity_per_unit}>"
+
+class Employee(Base):
+    """Staff member of the cafe."""
+
+    __tablename__ = "employees"
+
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
+    name = Column(String, nullable=False)
+    role = Column(String, nullable=False)
+    hourly_rate = Column(Float, nullable=False, default=0.0)
+    shift_start = Column(String, nullable=True) # e.g. "09:00"
+    shift_end = Column(String, nullable=True)   # e.g. "17:00"
+    is_active = Column(Integer, default=1) # 1 for active, 0 for inactive
+
+    def __repr__(self) -> str:
+        return f"<Employee id={self.id} tenant={self.tenant_id} name={self.name!r} role={self.role}>"
+
+
+class Attendance(Base):
+    """Daily check-in / check-out of an employee."""
+
+    __tablename__ = "attendance"
+
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
+    employee_id = Column(Integer, ForeignKey("employees.id"), nullable=False)
+    date = Column(DateTime, default=datetime.utcnow) # date of the shift
+    check_in = Column(DateTime, nullable=True)
+    check_out = Column(DateTime, nullable=True)
+    total_hours = Column(Float, nullable=False, default=0.0)
+    status = Column(String, default="PRESENT") # PRESENT, ABSENT, LATE
+
+    def __repr__(self) -> str:
+        return f"<Attendance id={self.id} emp={self.employee_id} date={self.date} hours={self.total_hours}>"
+
+
+class Wastage(Base):
+    """Records ingredients or menu items that expired or were wasted."""
+
+    __tablename__ = "wastage"
+
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
+    item_name = Column(String, nullable=False)
+    quantity = Column(Float, nullable=False)
+    loss_amount = Column(Float, nullable=False, default=0.0)
+    reason = Column(String, nullable=True, default="expired")
+    logged_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self) -> str:
+        return f"<Wastage id={self.id} item={self.item_name!r} qty={self.quantity} loss={self.loss_amount}>"
+
+
+class Batch(Base):
+    """Tracks expiry and batches for ingredients/inventories."""
+
+    __tablename__ = "batches"
+
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
+    item_name = Column(String, nullable=False)
+    batch_number = Column(String, nullable=True)
+    expiry_date = Column(DateTime, nullable=False)
+    quantity = Column(Float, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<Batch id={self.id} item={self.item_name!r} expiry={self.expiry_date} qty={self.quantity}>"
