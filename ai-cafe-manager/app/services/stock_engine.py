@@ -63,8 +63,14 @@ class StockEngine:
                 # Update the ingredient stock in DB
                 ing = db.query(Ingredient).filter(Ingredient.ingredient_name == rec.ingredient).first()
                 if ing:
+                    original_stock = ing.current_stock
                     ing.current_stock -= total_needed
-            
+                    
+                    # Trigger WhatsApp Alert if it crossed the reorder threshold
+                    if original_stock > ing.reorder_level and ing.current_stock <= ing.reorder_level:
+                        from app.services.whatsapp import send_whatsapp_alert
+                        send_whatsapp_alert(f"⚠️ *AIBO Immediate Alert*: Inventory for '{ing.ingredient_name}' has fallen below the reorder threshold. Stock remaining: {ing.current_stock:.1f} {ing.unit}.")
+
             db.commit()
         except Exception as e:
             db.rollback()

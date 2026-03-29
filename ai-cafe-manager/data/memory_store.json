@@ -633,5 +633,25 @@
     "query": "which item is trending",
     "response": "The trending item appears to be **FBC Beef Burger with Lime**.",
     "timestamp": "2026-03-28T19:25:21.826042"
+  },
+  {
+    "query": "ho",
+    "response": "I don't have access to information about \"ho\". Can you please provide more context or clarify your question?",
+    "timestamp": "2026-03-29T02:45:31.884480"
+  },
+  {
+    "query": "Items sold today?",
+    "response": "Items sold today include Loaded Fries Chicken, Oreo Shake, Chicken Nuggets (8 pcs), Loaded Fries Zinger, FBC Chicken Burger with Lime, FBC Beef Burger with Lime, FBC Zinger Burger with Lime, and FBC Veg Burger with Lime. The exact quantity of each item sold can be obtained by querying the inventory database.",
+    "timestamp": "2026-03-29T02:47:52.405019"
+  },
+  {
+    "query": "sales today",
+    "response": "The total sales for today are \u20b939,800.00, with 232 units sold.",
+    "timestamp": "2026-03-29T02:57:21.348974"
+  },
+  {
+    "query": "Predict sales for next week",
+    "response": "Next week's sales are predicted to be around \u20b9135,000.",
+    "timestamp": "2026-03-29T03:08:51.073055"
   }
 ]

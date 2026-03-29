@@ -816,5 +816,29 @@
     "response": "The trending item appears to be **FBC Beef Burger with Lime**.",
     "score": 1,
     "issues": []
+  },
+  {
+    "query": "ho",
+    "response": "I don't have access to information about \"ho\". Can you please provide more context or clarify your question?",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "Items sold today?",
+    "response": "Items sold today include Loaded Fries Chicken, Oreo Shake, Chicken Nuggets (8 pcs), Loaded Fries Zinger, FBC Chicken Burger with Lime, FBC Beef Burger with Lime, FBC Zinger Burger with Lime, and FBC Veg Burger with Lime. The exact quantity of each item sold can be obtained by querying the inventory database.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "sales today",
+    "response": "The total sales for today are \u20b939,800.00, with 232 units sold.",
+    "score": 1,
+    "issues": []
+  },
+  {
+    "query": "Predict sales for next week",
+    "response": "Next week's sales are predicted to be around \u20b9135,000.",
+    "score": 1,
+    "issues": []
   }
 ]
