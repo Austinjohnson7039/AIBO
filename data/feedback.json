@@ -804,5 +804,17 @@
     "response": "The total sales for the top 5 burger items this month are \u20b9142,037.91. However, this might not include all burger sales, as there could be other burger items not listed in the top 5. Without a more detailed breakdown of all burger sales, we can't provide an exact figure for total burger sales.",
     "score": 1,
     "issues": []
+  },
+  {
+    "query": "Add 300 burger bun in grocery",
+    "response": "Error in reasoning node: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}",
+    "score": 5,
+    "issues": []
+  },
+  {
+    "query": "which item is trending",
+    "response": "The trending item appears to be **FBC Beef Burger with Lime**.",
+    "score": 1,
+    "issues": []
   }
 ]

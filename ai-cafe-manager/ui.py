@@ -13,9 +13,13 @@ from pathlib import Path
 
 # ─── Configuration ────────────────────────────────────────────────────────────
 
-# Use environment variable for the backend URL if available (e.g., in cloud)
+# Default to localhost for internal container communication if not specified
 _BACKEND_BASE = os.getenv("BACKEND_URL", "http://localhost:8001")
 API_URL = f"{_BACKEND_BASE.rstrip('/')}/query/"
+
+# Security Credentials
+ADMIN_USER = os.getenv("APP_USERNAME", "admin")
+ADMIN_PASS = os.getenv("APP_PASSWORD", "cafe123")
 
 DATA_DIR = Path("data")
 INDEX_DIR = Path("faiss_index")
@@ -26,7 +30,24 @@ def main():
     # Setup page metadata
     st.set_page_config(page_title="AI Cafe Manager", page_icon="☕", layout="wide")
 
-    # 1. Title
+    # 0. Authentication Check
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
+
+    if not st.session_state.authenticated:
+        st.title("🔐 AI Cafe Manager Login")
+        with st.form("login_form"):
+            u = st.text_input("Username")
+            p = st.text_input("Password", type="password")
+            if st.form_submit_button("Login"):
+                if u == ADMIN_USER and p == ADMIN_PASS:
+                    st.session_state.authenticated = True
+                    st.rerun()
+                else:
+                    st.error("Invalid credentials.")
+        return
+
+    # 1. Main Dashboard (Authenticated)
     st.title("☕ AI Cafe Manager")
 
     # Create Tabs for Chat and System Monitoring

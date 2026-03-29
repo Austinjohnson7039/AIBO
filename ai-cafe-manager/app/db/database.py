@@ -4,10 +4,15 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from app.config import DATABASE_URL
 
 # ─── Engine ───────────────────────────────────────────────────────────────────
-# connect_args is required for SQLite to allow multi-threaded access (FastAPI)
+
+# Handle SQLite specific arguments (not needed for Postgres)
+engine_args = {}
+if DATABASE_URL.startswith("sqlite"):
+    engine_args["connect_args"] = {"check_same_thread": False}
+
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False},
+    **engine_args
 )
 
 # ─── Session Factory ──────────────────────────────────────────────────────────

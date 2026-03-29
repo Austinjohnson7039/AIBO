@@ -13,7 +13,7 @@ from app.db.models import Sale, Inventory
 logger = logging.getLogger(__name__)
 
 def record_sale_op(item: str, quantity: int, revenue: float) -> bool:
-    """Record a single sale line in the SQLite database."""
+    """Record a single sale line in the cloud database."""
     db = SessionLocal()
     try:
         new_sale = Sale(

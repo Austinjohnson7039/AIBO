@@ -1,3 +1,12 @@
+---
+title: AI Cafe Manager
+emoji: ☕
+colorFrom: yellow
+colorTo: red
+sdk: docker
+pinned: false
+---
+
 # AI Cafe Manager 🚀
 
 A production-grade AI system that helps a café owner analyse sales,

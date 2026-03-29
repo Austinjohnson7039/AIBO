@@ -623,5 +623,15 @@
     "query": "how many burger we sold this month",
     "response": "The total sales for the top 5 burger items this month are \u20b9142,037.91. However, this might not include all burger sales, as there could be other burger items not listed in the top 5. Without a more detailed breakdown of all burger sales, we can't provide an exact figure for total burger sales.",
     "timestamp": "2026-03-28T18:50:50.814870"
+  },
+  {
+    "query": "Add 300 burger bun in grocery",
+    "response": "Error in reasoning node: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}",
+    "timestamp": "2026-03-28T19:21:42.264690"
+  },
+  {
+    "query": "which item is trending",
+    "response": "The trending item appears to be **FBC Beef Burger with Lime**.",
+    "timestamp": "2026-03-28T19:25:21.826042"
   }
 ]

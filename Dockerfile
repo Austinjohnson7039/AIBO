@@ -13,7 +13,6 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
-    software-properties-common \
     git \
     && rm -rf /var/lib/apt/lists/*
 
@@ -31,8 +30,8 @@ RUN mkdir -p data/sync/incoming data/sync/archive faiss_index
 COPY start_services.sh /usr/local/bin/start_services.sh
 RUN chmod +x /usr/local/bin/start_services.sh
 
-# Expose ports (FastAPI=8001, Streamlit=8501)
-EXPOSE 8001 8501
+# Expose the single ingress port (Hugging Face default)
+EXPOSE 7860
 
 # Entry point starts the multi-process script
 ENTRYPOINT ["/usr/local/bin/start_services.sh"]
