@@ -59,11 +59,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Enable CORS for cross-origin access (Streamlit <-> FastAPI)
+# Enable CORS for cross-origin access (Streamlit/React <-> FastAPI)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # For production, we can refine this to specific domains
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
