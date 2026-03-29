@@ -30,9 +30,17 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """
     Modern FastAPI lifespan context manager.
-    Replaces the deprecated @app.on_event("startup") pattern.
     """
     logger.info("Starting up %s v%s …", APP_TITLE, APP_VERSION)
+    
+    # 1. Run migrations (idempotent)
+    from migrate_db import migrate
+    try:
+        migrate()
+    except Exception as e:
+        logger.warning("Migration notice: %s", e)
+
+    # 2. Init DB and load data
     init_db()
     # load_data() - Disabled for Multi-Tenant SaaS migration
     logger.info("Startup complete. Server is ready.")
@@ -50,14 +58,23 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Enable CORS for cross-origin access (Streamlit <-> FastAPI)
+# Enable CORS for cross-origin access (Streamlit/React <-> FastAPI)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # For production, we can refine this to specific domains
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ─── Routers ──────────────────────────────────────────────────────────────────
+
+@app.get("/")
+async def root():
+    """Root health check to verify the backend is alive."""
+    return {"message": "AI Cafe Manager Running 🚀"}
+
+# Use /api prefix to match frontend default production path
 app.include_router(router, prefix="/api")
+# Also mount at root for direct calls (Universal pathing)
+app.include_router(router)
