@@ -33,6 +33,15 @@ async def lifespan(app: FastAPI):
     Replaces the deprecated @app.on_event("startup") pattern.
     """
     logger.info("Starting up %s v%s …", APP_TITLE, APP_VERSION)
+    
+    # 1. Run migrations (idempotent)
+    from migrate_db import migrate
+    try:
+        migrate()
+    except Exception as e:
+        logger.warning("Migration notice: %s", e)
+
+    # 2. Init DB and load data
     init_db()
     load_data()
     logger.info("Startup complete. Server is ready.")

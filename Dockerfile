@@ -23,6 +23,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
+# Pre-download the local embedding model during build (avoids runtime timeout)
+RUN python3 -c "from fastembed import TextEmbedding; TextEmbedding(model_name='BAAI/bge-small-en-v1.5')"
+
 # Create directories for persistent data if they don't exist
 RUN mkdir -p data/sync/incoming data/sync/archive faiss_index
 

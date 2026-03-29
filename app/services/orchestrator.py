@@ -42,7 +42,15 @@ class Orchestrator:
         # Tools for grounding the Judge
         self.analyst = AnalystAgent()
         self.retriever = Retriever()
-        self.retriever.load_index()
+        
+        # Self-Healing: Ingest if the index doesn't exist (crucial for production)
+        try:
+            self.retriever.load_index()
+        except FileNotFoundError:
+            logger.warning("FAISS index not found. Triggering autonomous ingestion protocol...")
+            from app.rag.ingest import ingest_documents
+            ingest_documents()
+            self.retriever.load_index()
 
     def handle(self, query: str) -> dict:
         """
