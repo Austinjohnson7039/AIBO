@@ -39,8 +39,7 @@ def fuzzy_map_columns(df: pd.DataFrame) -> pd.DataFrame:
     if 'revenue' not in column_mapping.values(): missing.append('revenue (Total Sales, INR)')
     
     if missing:
-        raise ValueError(f"Parser mismatch: Could not locate columns for: {', '.join(missing)}. Analyzed headers: {raw_cols}. Please verify the Excel structure.")
-        
+        raise ValueError(f"Missing required columns. We couldn't find: {', '.join(missing)}.\n\nYour headers were: {list(raw_cols)}.\nPlease download the AIBO Template and copy your sales into it to ensure perfect compatibility!")
     df = df.rename(columns=column_mapping)
     
     # Filter and clean

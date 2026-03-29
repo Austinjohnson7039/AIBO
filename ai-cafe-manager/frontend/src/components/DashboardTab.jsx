@@ -1,25 +1,16 @@
 import { useEffect, useState, useRef } from 'react'
-import { getDashboard, exportSalesExcel, uploadExcelSales } from '../api.js'
+import { getDashboard, exportSalesExcel, uploadExcelSales, queryAI } from '../api.js'
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+  AreaChart, Area, PieChart, Pie, Legend
 } from 'recharts'
-
-function KpiCard({ label, value, sub, accent }) {
-  return (
-    <div className="card">
-      <div className="card-label">{label}</div>
-      <div className={`card-value ${accent ? 'accent' : ''}`}>{value}</div>
-      {sub && <div className="card-sub">{sub}</div>}
-    </div>
-  )
-}
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload?.length) {
     return (
-      <div style={{ background: 'var(--bg-1)', border: '1px solid var(--border-md)', borderRadius: 'var(--r-md)', padding: '10px 14px', boxShadow: 'var(--shadow-2)' }}>
-        <p style={{ fontWeight: 650, fontSize: 11, marginBottom: 5, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--ink-3)' }}>{label}</p>
-        <p style={{ color: 'var(--gold)', fontSize: 16, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>₹{Number(payload[0].value).toLocaleString('en-IN')}</p>
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-strong)', borderRadius: 'var(--radius-md)', padding: '10px 14px', boxShadow: 'var(--shadow-md)' }}>
+        <p style={{ fontWeight: 600, fontSize: 10, marginBottom: 4, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>{label}</p>
+        <p style={{ color: 'var(--primary)', fontSize: 16, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>₹{Number(payload[0].value).toLocaleString('en-IN')}</p>
       </div>
     )
   }
@@ -29,38 +20,11 @@ const CustomTooltip = ({ active, payload, label }) => {
 export default function DashboardTab() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
-  
+  const [aiQuery, setAiQuery] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiAnswer, setAiAnswer] = useState('')
   const fileInputRef = useRef(null)
-  const [downloading, setDownloading] = useState(false)
-  const [uploading, setUploading] = useState(false)
   const [msg, setMsg] = useState('')
-
-  const handleExport = async () => {
-    setDownloading(true)
-    setMsg('')
-    try {
-      await exportSalesExcel()
-      setMsg('✓ Sales export downloaded successfully.')
-    } catch (e) { setMsg(`⨯ Export failed: ${e.message}`) }
-    setDownloading(false)
-  }
-
-  const handleUpload = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-    setUploading(true)
-    setMsg('')
-    try {
-      const res = await uploadExcelSales(file)
-      setMsg(res.message ? `✓ ${res.message}` : '✓ Excel data uploaded.')
-      // Refresh dashboard data instantly 
-      getDashboard().then(setData)
-    } catch (err) {
-      setMsg(`⨯ Upload error: ${err.message}`)
-    }
-    setUploading(false)
-    if (fileInputRef.current) fileInputRef.current.value = ''
-  }
 
   useEffect(() => {
     getDashboard()
@@ -69,104 +33,211 @@ export default function DashboardTab() {
       .finally(() => setLoading(false))
   }, [])
 
+  const askAI = async () => {
+    // Deprecated in Dashboard
+  }
+
+  const handleExport = async () => {
+    setMsg('')
+    try {
+      await exportSalesExcel()
+      setMsg('✓ Data exported successfully.')
+    } catch (e) { setMsg(`✕ Export failed: ${e.message}`) }
+  }
+
+  const handleUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setMsg('')
+    try {
+      const res = await uploadExcelSales(file)
+      setMsg(res.message ? `✓ ${res.message}` : '✓ Upload complete.')
+      getDashboard().then(setData)
+    } catch (err) { setMsg(`✕ Upload error: ${err.message}`) }
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   if (loading) return (
     <div>
       <div className="kpi-grid">
-        {[1,2,3,4].map(i => <div key={i} className="skeleton" style={{ height: 110 }} />)}
+        {[1,2,3].map(i => <div key={i} className="kpi-card" style={{ height: 100, opacity: 0.3 }} />)}
       </div>
-      <div className="skeleton" style={{ height: 350 }} />
     </div>
   )
 
   const kpis = data?.kpis || {}
-  const top5 = kpis.top_5 || {}
-  const chartData = Object.entries(top5).map(([name, rev]) => ({ name, revenue: rev }))
-  const COLORS = ['#C9962A', '#E3B44A', '#D4A017', '#B3831F', '#A07010']
+  const chartData = Object.entries(kpis.top_5 || {}).map(([name, rev]) => ({ name, revenue: rev }))
+  const COLORS = ['#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#34D399', '#FBBF24']
+  const alerts = data?.alerts || []
+  const advanced = data?.advanced_reports || {}
 
   return (
-    <div>
-      <h2 className="section-head"><span className="icon">⬡</span> Revenue Intelligence</h2>
+    <div className="fade-in">
+
+      {/* ── KPIs ── */}
       <div className="kpi-grid">
-        <KpiCard
-          label="Today's Velocity"
-          value={`₹${(kpis.today_rev || 0).toLocaleString('en-IN', {maximumFractionDigits:0})}`}
-          sub="Live from Supabase Cloud"
-          accent
-        />
-        <KpiCard
-          label="Weekly Bookings"
-          value={`₹${(kpis.week_rev || 0).toLocaleString('en-IN', {maximumFractionDigits:0})}`}
-          sub="Last 7 calendar days"
-        />
-        <KpiCard
-          label="Monthly Revenue"
-          value={`₹${(kpis.month_rev || 0).toLocaleString('en-IN', {maximumFractionDigits:0})}`}
-          sub="Month to date aggregate"
-        />
-        <KpiCard
-          label="Units Moved"
-          value={(kpis.total_items || 0).toLocaleString('en-IN')}
-          sub="All time transactions"
-        />
+        <div className="kpi-card">
+          <div className="kpi-icon" style={{ background: 'var(--primary-dim)' }}>☕</div>
+          <div className="card-label">Today's Revenue</div>
+          <div className="card-value accent">₹{(kpis.today_rev || 0).toLocaleString('en-IN')}</div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-icon" style={{ background: 'var(--success-dim)' }}>💰</div>
+          <div className="card-label">Total Revenue</div>
+          <div className="card-value">₹{(kpis.total_rev || 0).toLocaleString('en-IN')}</div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-icon" style={{ background: 'var(--accent-dim)' }}>📦</div>
+          <div className="card-label">Items Sold</div>
+          <div className="card-value">{(kpis.total_items || 0).toLocaleString('en-IN')}</div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-icon" style={{ background: 'var(--warning-dim)' }}>📈</div>
+          <div className="card-label">Gross Margin</div>
+          <div className="card-value">{advanced.gross_margin_pct || 0}%</div>
+        </div>
       </div>
 
-      <div className="divider" />
+      {/* ── Alerts ── */}
+      {alerts.length > 0 && (
+        <div style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {alerts.slice(0, 3).map((a, i) => (
+            <div key={i} className={`badge ${a.level === 'CRITICAL' ? 'badge-danger' : 'badge-warning'}`}
+              style={{ padding: '8px 14px', fontSize: 12, width: '100%', justifyContent: 'flex-start' }}>
+              {a.level === 'CRITICAL' ? '🚨' : '⚠️'} {a.msg}
+            </div>
+          ))}
+        </div>
+      )}
 
-      <h2 className="section-head"><span className="icon">↓↑</span> Excel Data Gateway</h2>
-      <div className="card" style={{ marginBottom: 32, padding: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+      {/* ── AI Insight Banner ── */}
+      {advanced.ai_insight && advanced.ai_insight !== "Not enough data for insights." && (
+        <div className="card fade-in" style={{ marginBottom: 20, background: 'var(--bg-elevated)', borderLeft: '4px solid #F59E0B', display: 'flex', gap: 16, alignItems: 'center', padding: '16px 24px' }}>
+          <div style={{ fontSize: 24 }}>🧠</div>
           <div>
-            <p style={{ fontSize: 13, color: 'var(--ink-4)', marginTop: 4 }}>
-              Upload unformatted POS Excel reports for intelligent parsing, or download live analytical databases.
+            <h3 style={{ margin: '0 0 4px 0', fontSize: 14 }}>Advanced Analytics</h3>
+            <p style={{ margin: 0, color: 'var(--text-dim)', fontSize: 13 }}>
+              {advanced.ai_insight}
             </p>
           </div>
         </div>
-        
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <input 
-            type="file" 
-            accept=".xlsx, .xls" 
-            style={{ display: 'none' }} 
-            ref={fileInputRef} 
-            onChange={handleUpload} 
-          />
-          <button className="btn btn-gold" onClick={() => fileInputRef.current?.click()} disabled={uploading || downloading}>
-            <span className="icon">↑</span> {uploading ? 'Processing XL...' : 'Upload Daily Sales (.xlsx)'}
-          </button>
-          
-          <button className="btn btn-ghost" onClick={handleExport} disabled={downloading || uploading}>
-            <span className="icon">↓</span> {downloading ? 'Exporting...' : 'Download Export (.xlsx)'}
-          </button>
+      )}
+
+      {/* ── Data Actions ── */}
+      <div className="card" style={{ marginBottom: 20, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+        <div>
+          <div className="card-label">Sales Data</div>
+          <p style={{ fontSize: 13, color: 'var(--text-dim)', margin: '4px 0 0' }}>
+            Import your POS sales from Excel, or export your café data for offline analysis.
+          </p>
         </div>
-        
-        {msg && (
-          <div style={{ marginTop: 16, fontSize: 12.5, color: msg.startsWith('✓') ? 'var(--green)' : 'var(--red)', fontWeight: 650, letterSpacing: '0.5px' }}>
-            {msg}
-          </div>
-        )}
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <input type="file" accept=".xlsx, .xls" style={{ display: 'none' }} ref={fileInputRef} onChange={handleUpload} />
+          <button className="btn btn-primary" onClick={() => fileInputRef.current?.click()}>Import Sales</button>
+          <button className="btn btn-ghost" onClick={handleExport}>Export Data</button>
+          {msg && (
+            <div style={{ fontSize: 12, color: msg.startsWith('✓') ? 'var(--success)' : 'var(--danger)', fontWeight: 600 }}>
+              {msg}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="divider" />
+      {/* ── Advanced Analytics Charts ── */}
+      <div className="grid-2" style={{ marginBottom: 20 }}>
+        {/* Daily Sales Trend */}
+        <div className="card">
+          <div className="card-label">14-Day Revenue Trend</div>
+          <div style={{ paddingTop: 16 }}>
+            {(!advanced.daily_sales || advanced.daily_sales.length === 0) ? (
+              <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 13 }}>No recent data.</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={220}>
+                <AreaChart data={advanced.daily_sales} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
+                  <XAxis dataKey="date" tick={{ fill: 'var(--text-dim)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'var(--text-dim)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `₹${(v/1000).toFixed(0)}k`} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="revenue" stroke="#10B981" fillOpacity={1} fill="url(#colorRev)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
 
-      <h2 className="section-head"><span className="icon">🏆</span> Bestseller Analysis</h2>
-      
-      <div className="card" style={{ padding: '28px 20px 10px' }}>
-        {chartData.length === 0
-          ? <div className="empty"><div className="empty-icon">📊</div><p>Insufficient transaction data to model.</p></div>
-          : (
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={chartData} margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: 'var(--ink-3)', fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} dy={10} />
-                <YAxis tick={{ fill: 'var(--ink-4)', fontSize: 11, fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} tickFormatter={v => `₹${(v/1000).toFixed(0)}k`} dx={-10} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--bg-2)' }} />
-                <Bar dataKey="revenue" radius={[6, 6, 0, 0]} maxBarSize={55}>
-                  {chartData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          )
-        }
+        {/* Peak Hours Analysis */}
+        <div className="card">
+          <div className="card-label">Peak Operating Hours</div>
+          <div style={{ paddingTop: 16 }}>
+            {(!advanced.peak_hours || advanced.peak_hours.length === 0) ? (
+              <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 13 }}>No operational data.</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={advanced.peak_hours} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
+                  <XAxis dataKey="hour" tick={{ fill: 'var(--text-dim)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'var(--text-dim)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `₹${(v/1000).toFixed(0)}k`} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--border-subtle)' }} />
+                  <Bar dataKey="revenue" fill="#3B82F6" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid-2" style={{ marginBottom: 20 }}>
+        {/* Category Performance */}
+        <div className="card">
+          <div className="card-label">Sales by Category</div>
+          <div style={{ paddingTop: 16 }}>
+            {(!advanced.category_performance || advanced.category_performance.length === 0) ? (
+              <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 13 }}>No category data.</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie data={advanced.category_performance} dataKey="revenue" nameKey="category" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={2}>
+                    {advanced.category_performance.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: 11, color: 'var(--text-dim)' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+        {/* ── Original Charts ── */}
+        <div className="card">
+          <div className="card-label">Top Selling Items</div>
+          <div style={{ paddingTop: 16 }}>
+            {chartData.length === 0 ? (
+              <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 13 }}>
+                No sales data yet. Import your first Excel or record sales through AI chat.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 20, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" horizontal={false} />
+                  <XAxis type="number" tick={{ fill: 'var(--text-dim)', fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} tickFormatter={v => `₹${(v/1000).toFixed(0)}k`} />
+                  <YAxis dataKey="name" type="category" tick={{ fill: 'var(--text-primary)', fontSize: 11, fontWeight: 500 }} axisLine={false} tickLine={false} width={100} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--border-subtle)' }} />
+                  <Bar dataKey="revenue" radius={[0, 6, 6, 0]} maxBarSize={24}>
+                    {chartData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -31,5 +31,12 @@ watchdog>=4.0.0
 # ─── Integrations ─────────────────────────────────────────────────────────────
 twilio>=8.0.0
 openpyxl>=3.1.0
-python-multipart>=0.0.9
 fpdf2>=2.7.9
+
+# ─── Auth & SaaS ──────────────────────────────────────────────────────────────
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.9
+
+# ─── Intelligence ─────────────────────────────────────────────────────────────
+python-weather>=1.1.2

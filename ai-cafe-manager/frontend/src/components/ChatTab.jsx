@@ -1,33 +1,30 @@
 import { useState, useRef, useEffect } from 'react'
 import { queryAI } from '../api.js'
 
-function Badge({ score }) {
-  if (score >= 8) return <span className="badge badge-green">High Confidence</span>
-  if (score >= 5) return <span className="badge badge-amber">Medium Confidence</span>
-  return <span className="badge badge-red">Low Confidence</span>
-}
-
 export default function ChatTab() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [response, setResponse] = useState(null)
-  const [error, setError] = useState('')
-  const textareaRef = useRef()
+  const [messages, setMessages] = useState([])
+  const scrollRef = useRef(null)
+  const textareaRef = useRef(null)
 
   const submit = async () => {
     const q = input.trim()
-    if (!q) return
+    if (!q || loading) return
+
+    const userMsg = { role: 'user', text: q, time: new Date() }
+    setMessages(prev => [...prev, userMsg])
+    setInput('')
     setLoading(true)
-    setError('')
-    setResponse(null)
+
     try {
       const data = await queryAI(q)
-      setResponse(data)
-    } catch (e) {
-      setError(e.message || 'Connection lost to the AI Engine.')
-    } finally {
-      setLoading(false)
+      const aiMsg = { role: 'ai', text: data.response || data.answer || 'No response.', time: new Date() }
+      setMessages(prev => [...prev, aiMsg])
+    } catch {
+      setMessages(prev => [...prev, { role: 'ai', text: 'Something went wrong. Please try again.', time: new Date(), error: true }])
     }
+    setLoading(false)
   }
 
   const handleKey = (e) => {
@@ -37,107 +34,71 @@ export default function ChatTab() {
     }
   }
 
+  // Auto-scroll to bottom
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [messages, loading])
+
+  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px'
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px'
     }
   }, [input])
 
-  const ev = response?.evaluation || {}
-  const score = ev?.score ?? 0
-
   return (
-    <div className="chat-page">
-      <div className="chat-composer">
+    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 160px)', maxWidth: 800, margin: '0 auto' }}>
+
+      {/* Messages Area */}
+      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', paddingBottom: 16 }}>
+        {messages.length === 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, opacity: 0.6 }}>
+            <span style={{ fontSize: 48 }}>☕</span>
+            <h3 style={{ fontSize: 18, fontFamily: "'Playfair Display', serif", color: 'var(--primary)' }}>Ask AIBO Anything</h3>
+            <p style={{ fontSize: 13, color: 'var(--text-dim)', textAlign: 'center', maxWidth: 360, lineHeight: 1.6 }}>
+              Try: "What's our total revenue?" or "Add 20 burger buns to grocery"
+            </p>
+          </div>
+        )}
+
+        <div className="chat-container">
+          {messages.map((msg, i) => (
+            <div key={i} className={`chat-bubble ${msg.role}`} style={msg.error ? { borderColor: 'var(--danger)' } : {}}>
+              {msg.text}
+            </div>
+          ))}
+
+          {loading && (
+            <div className="chat-bubble ai" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
+              <span style={{ fontSize: 13, color: 'var(--text-dim)' }}>Thinking...</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Input Bar */}
+      <div className="chat-input-bar">
         <textarea
           ref={textareaRef}
-          className="chat-textarea"
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKey}
-          placeholder="Ask AIBO about sales, inventory, or forecasting... (Press Enter)"
+          placeholder="Ask about sales, inventory, or give instructions..."
           rows={1}
         />
-        <button className="chat-send" onClick={submit} disabled={loading || !input.trim()}>
-          {loading ? '⟳' : '↑'}
+        <button
+          className="btn btn-primary"
+          style={{ borderRadius: 'var(--radius-md)', padding: '8px 16px', minWidth: 60 }}
+          onClick={submit}
+          disabled={loading || !input.trim()}
+        >
+          {loading ? '...' : 'Send'}
         </button>
       </div>
-
-      {error && (
-        <div className="alert alert-red">
-          <span className="alert-icon">⚠</span>
-          <div>{error}</div>
-        </div>
-      )}
-
-      {loading && (
-        <div className="chat-result">
-          <div className="thinking">
-            AIBO is analysing
-            <div className="dots">
-              <div className="dot" /><div className="dot" /><div className="dot" />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {response && !loading && (
-        <div className="chat-result">
-          <div className="chat-result-body">
-            <div className="chat-result-eyebrow">
-              <span className="icon">◈</span> AI Insights
-            </div>
-            <div className="chat-result-text">
-              {response.response || response.answer || 'No intelligent response generated.'}
-            </div>
-          </div>
-
-          <div className="chat-result-footer">
-            <div className="chat-meta-cell">
-              <div className="chat-meta-label">Assurance</div>
-              <Badge score={score} />
-            </div>
-            <div className="chat-meta-cell">
-              <div className="chat-meta-label">Accuracy Score</div>
-              <div className="mono" style={{ fontSize: 22, fontWeight: 700, color: 'var(--ink-1)' }}>
-                {score}<span style={{ fontSize: 13, color: 'var(--ink-4)', fontWeight: 400 }}>/10</span>
-              </div>
-            </div>
-            <div className="chat-meta-cell">
-              <div className="chat-meta-label">Safety Filter</div>
-              {response.safe
-                ? <span className="badge badge-green">Verified</span>
-                : <span className="badge badge-amber">Flagged</span>}
-            </div>
-          </div>
-
-          {(score < 5 || ev?.hallucination) && ev?.reason && (
-            <div style={{ padding: '14px 22px', borderTop: '1px solid var(--border)' }}>
-              <div className="alert alert-amber">
-                <span className="alert-icon">⚠</span>
-                <div><strong>Judge Flag:</strong> {ev.reason}</div>
-              </div>
-            </div>
-          )}
-
-          {response.sources?.length > 0 && (
-            <div className="chat-sources">
-              <div className="chat-meta-label" style={{ marginRight: 8 }}>References:</div>
-              {response.sources.map((s, i) => (
-                <span key={i} className="source-tag">{s}</span>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {!response && !loading && !error && (
-        <div className="empty" style={{ marginTop: 40 }}>
-          <div className="empty-icon">☕</div>
-          <p>I am AIBO, your Cafe Intelligence Engine.<br/>Ask me anything about your business data.</p>
-        </div>
-      )}
     </div>
   )
 }

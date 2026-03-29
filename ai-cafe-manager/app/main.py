@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
     """
     logger.info("Starting up %s v%s …", APP_TITLE, APP_VERSION)
     init_db()
-    load_data()
+    # load_data() - Disabled for Multi-Tenant SaaS migration
     logger.info("Startup complete. Server is ready.")
     yield
     logger.info("Shutting down %s.", APP_TITLE)
@@ -60,4 +60,4 @@ app.add_middleware(
 )
 
 # ─── Routers ──────────────────────────────────────────────────────────────────
-app.include_router(router)
+app.include_router(router, prefix="/api")
