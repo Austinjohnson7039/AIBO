@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef } from 'react'
-import { getDashboard, exportSalesExcel, uploadExcelSales, queryAI } from '../api.js'
+import { useEffect, useState, useRef } from 'react';
+import { getDashboard, exportSalesExcel, uploadExcelSales, queryAI } from '../api.js';
+import CafeLoader from './CafeLoader.jsx';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   AreaChart, Area, PieChart, Pie, Legend
@@ -57,13 +58,7 @@ export default function DashboardTab() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  if (loading) return (
-    <div>
-      <div className="kpi-grid">
-        {[1,2,3].map(i => <div key={i} className="kpi-card" style={{ height: 100, opacity: 0.3 }} />)}
-      </div>
-    </div>
-  )
+  if (loading) return <CafeLoader />;
 
   const kpis = data?.kpis || {}
   const chartData = Object.entries(kpis.top_5 || {}).map(([name, rev]) => ({ name, revenue: rev }))

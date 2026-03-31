@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getSmartMenu } from '../api.js';
+import CafeLoader from './CafeLoader.jsx';
 
 export default function SmartMenuTab() {
   const [data, setData] = useState(null);
@@ -13,11 +14,7 @@ export default function SmartMenuTab() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return (
-    <div className="fade-in">
-      <div className="card" style={{ height: 400, opacity: 0.3 }} />
-    </div>
-  );
+  if (loading) return <CafeLoader />;
 
   if (error) return (
     <div className="fade-in">

@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
-import { getForecast, getTrends, triggerProcurement } from '../api.js'
+import { useEffect, useState } from 'react';
+import { getForecast, getTrends, triggerProcurement } from '../api.js';
+import CafeLoader from './CafeLoader.jsx';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
 } from 'recharts'
@@ -30,14 +31,7 @@ export default function PredictTab() {
     setProcuring(false)
   }
 
-  if (loading) return (
-    <div className="fade-in">
-      <div className="grid-2" style={{ gap: 16 }}>
-        <div className="card" style={{ height: 400, opacity: 0.3 }} />
-        <div className="card" style={{ height: 400, opacity: 0.3 }} />
-      </div>
-    </div>
-  )
+  if (loading) return <CafeLoader />;
 
   const runwayData = (forecast?.runway_metrics || [])
     .map(r => ({ name: r.ingredient_name, days: Math.min(r.runway_days ?? 30, 30) }))

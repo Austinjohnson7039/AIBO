@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getDashboard, getVendors, addVendor, restockGrocery, addGrocery, removeGrocery } from '../api.js';
+import CafeLoader from './CafeLoader.jsx';
 
 const CATEGORIES = ['Dairy', 'Coffee Beans', 'Syrups', 'Bakery', 'Packaging', 'Spices', 'Beverages', 'Other'];
 
@@ -77,13 +78,7 @@ export default function GroceryTab() {
     setTimeout(() => setMsg(''), 3000);
   };
 
-  if (loading) return (
-    <div className="fade-in">
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {[1,2,3].map(i => <div key={i} className="card" style={{ height: 60, opacity: 0.3 }} />)}
-      </div>
-    </div>
-  );
+  if (loading) return <CafeLoader />;
 
   const inventory = data?.inventory || [];
   const lowStock = inventory.filter(i => i.current_stock <= i.reorder_level);
