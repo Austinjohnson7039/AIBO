@@ -1,4 +1,5 @@
-const BASE = import.meta.env.VITE_API_URL || '/api';
+const rawBase = import.meta.env.VITE_API_URL || '';
+const BASE = rawBase.endsWith('/api') ? rawBase : `${rawBase}/api`;
 
 /**
  * Universal request handler with JWT injection
