@@ -172,17 +172,22 @@ class AnalystAgent:
             if employees:
                 staff_lines = []
                 for emp in employees:
-                    # check if clocked in
-                    att = db.query(Attendance).filter(
+                    # Get all attendances to calculate current unpaid salary
+                    atts = db.query(Attendance).filter(
                         Attendance.tenant_id == tenant_id, 
                         Attendance.employee_id == emp.id
-                    ).order_by(Attendance.id.desc()).first()
+                    ).all()
+                    
+                    total_hrs = sum(a.total_hours for a in atts)
+                    current_salary = total_hrs * emp.hourly_rate
+                    
+                    latest_att = sorted(atts, key=lambda x: x.id, reverse=True)[0] if atts else None
                     
                     status = "Not clocked in"
-                    if att and att.check_in and not att.check_out:
+                    if latest_att and latest_att.check_in and not latest_att.check_out:
                         status = "Currently Working (Clocked In)"
                         
-                    staff_lines.append(f"- {emp.name} (Role: {emp.role}, Status: {status})")
+                    staff_lines.append(f"- Name: {emp.name} | Role: {emp.role} | Status: {status} | Hourly Rate: ₹{emp.hourly_rate} | Accumulated Salary: ₹{round(current_salary, 2)}")
                 context_blocks.append("\n".join(staff_lines))
             else:
                 context_blocks.append("No staff recorded.")
@@ -232,10 +237,10 @@ class AnalystAgent:
             "5. Never fabricate data. If 'No staff recorded' is given, then say 0 staff. If data is unavailable, state it precisely in one line.\n\n"
 
             "FORMATTING RULES — ALWAYS follow this structure:\n"
-            "1. EXTREMELY CONCISE. Use bullet points heavily. NO LONG PARAGRAPHS.\n"
-            "2. Use **bold** for key metrics, item names, and action items.\n"
-            "3. Omit marketing fluff. Go straight to the answer.\n"
-            "4. End with a crisp **Bottom Line** one-liner under `---`.\n"
+            "1. NO ASTERISKS. DO NOT use '*' or '**' to bold text or create lists anywhere in your output.\n"
+            "2. KEEP IT SHORT. Your text answers must be 1-3 sentences maximum. Be concise.\n"
+            "3. If presenting metrics, numbers, or a list of items, you MUST USE a Markdown Table.\n"
+            "4. End with a crisp 'Bottom Line' one-liner.\n"
         )
 
         user_prompt = f"Question: {query}\n\nDatabase Context:\n{db_context}"

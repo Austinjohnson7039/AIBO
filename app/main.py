@@ -43,6 +43,11 @@ async def lifespan(app: FastAPI):
     # 2. Init DB and load data
     init_db()
     # load_data() - Disabled for Multi-Tenant SaaS migration
+    
+    # 3. Fire Autonomous Agents
+    from app.api.cron_tasks import start_background_cron_jobs
+    start_background_cron_jobs()
+    
     logger.info("Startup complete. Server is ready.")
     yield
     logger.info("Shutting down %s.", APP_TITLE)
@@ -74,7 +79,6 @@ async def root():
     """Root health check to verify the backend is alive."""
     return {"message": "AI Cafe Manager Running 🚀"}
 
-# Use /api prefix to match frontend default production path
+# Mount ONCE with /api prefix — frontend should use /api/... paths
+# BUG FIX: Was mounted twice (with and without prefix), causing duplicate routes
 app.include_router(router, prefix="/api")
-# Also mount at root for direct calls (Universal pathing)
-app.include_router(router)

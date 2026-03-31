@@ -84,12 +84,33 @@ class OperationsAgent:
                 from app.db.models import Wastage, Ingredient
                 ing = db.query(Ingredient).filter(Ingredient.tenant_id == tenant_id, Ingredient.ingredient_name == item_name).first()
                 if ing:
-                    ing.current_stock -= float(qty)
+                    ing.current_stock = max(0.0, float(ing.current_stock) - float(qty))
                 
                 w = Wastage(tenant_id=tenant_id, item_name=item_name, quantity=float(qty), loss_amount=float(loss), reason=reason)
                 db.add(w)
                 db.commit()
                 return f"Wastage recorded: {qty}x {item_name} ({reason}) for a loss of ₹{loss}."
+
+            elif action == 'update_inventory':
+                updates = action_json.get("updates", {})
+                if not updates:
+                    return "No distinct update fields provided. Please specify what you want changed."
+                
+                # 1. Try Menu Inventory first
+                from app.db.ops_helpers import update_inventory_op
+                if update_inventory_op(tenant_id, item_name, updates):
+                    return f"Successfully updated '{item_name}' in your active menu."
+                
+                # 2. Try Grocery Ingredients
+                ing = db.query(Ingredient).filter(Ingredient.tenant_id == tenant_id, Ingredient.ingredient_name.like(f"%{item_name}%")).first()
+                if ing:
+                    for field, value in updates.items():
+                        if hasattr(ing, field) and value is not None:
+                            setattr(ing, field, value)
+                    db.commit()
+                    return f"Successfully updated your raw grocery stock for '{item_name}'."
+                
+                return f"Could not locate '{item_name}' in either menu catalogue or grocery stock."
 
             elif action == 'ask_clarification':
                 return action_json.get("clarification_msg", "I need more details to perform that action.")

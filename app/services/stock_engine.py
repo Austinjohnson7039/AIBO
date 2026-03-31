@@ -1,8 +1,11 @@
+import logging
 import pandas as pd
 from datetime import datetime, timedelta
 from sqlalchemy import select, update, delete
 from sqlalchemy.orm import Session
 from app.db.models import Ingredient, Recipe, Sale, Inventory, Tenant
+
+logger = logging.getLogger(__name__)
 
 class StockEngine:
     def __init__(self):
@@ -50,11 +53,12 @@ class StockEngine:
 
         return grocery_df, recipes_df, sales_df, inv_df
 
-    def record_sale_and_deduct(self, db: Session, tenant_id: int, item_name: str, quantity: int, revenue: float):
+    def record_sale_and_deduct(self, db: Session, tenant_id: int, item_name: str, quantity: int, revenue: float, sale_date: datetime = None):
         """Records a sale and deducts ingredients for a specific tenant."""
         try:
             # 1. Record Sale
-            new_sale = Sale(tenant_id=tenant_id, item=item_name, quantity=quantity, revenue=revenue)
+            s_date = sale_date if sale_date and not pd.isna(sale_date) else datetime.utcnow()
+            new_sale = Sale(tenant_id=tenant_id, item=item_name, quantity=quantity, revenue=revenue, sale_date=s_date)
             db.add(new_sale)
             
             # 2. Deduct Ingredients
@@ -74,7 +78,8 @@ class StockEngine:
             db.commit()
         except Exception as e:
             db.rollback()
-            print(f"Deduction error: {e}")
+            # BUG FIX (BUG 8): Was using print() which is invisible in production logs
+            logger.error(f"Sale deduction error for tenant {tenant_id}, item '{item_name}': {e}")
 
     def restock_item(self, db: Session, tenant_id: int, ingredient_name: str, added_amount: float):
         """Adds stock for a tenant's ingredient."""

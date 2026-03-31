@@ -56,11 +56,12 @@ class Orchestrator:
             except Exception as e:
                 logger.error("Failed to recover FAISS index: %s", e)
 
-    def handle(self, query: str) -> dict:
+    def handle(self, tenant_id: int, query: str) -> dict:
         """
         Process the incoming query across the Multi-Agent architecture.
         
         Args:
+            tenant_id: The active session owner ID.
             query: The natural language string from the user.
             
         Returns:
@@ -75,10 +76,13 @@ class Orchestrator:
         logger.info("Orchestrator received query: %r", query)
 
         # 0. Get session memory
-        memory_context = self.memory.get_context(query)
+        memory_context = self.memory.get_context(tenant_id, query)
 
         # 1. NEW: Execute query via LangGraph State Machine
-        # This replaces the Manager Router and manual Execution phases.
+        # Secure Context Thread Delegation
+        from app.agents.tools import tenant_context
+        tenant_context.set(tenant_id)
+        
         graph_result = run_agentic_query(query, history=memory_context)
         
         agent_answer = graph_result.get("answer", "No answer provided.")
@@ -92,7 +96,7 @@ class Orchestrator:
         # 3. Grounding phase (Fetch context for the Judge)
         # We fetch the full DB context and a snippet of FAQ to ensure the 
         # Evaluator has the same grounding as the agent.
-        db_context = self.analyst.fetch_db_context()
+        db_context = self.analyst.fetch_db_context(tenant_id)
         faq_context = ""
         faq_results = self.retriever.search(query, top_k=2)
         if faq_results:
@@ -126,7 +130,7 @@ class Orchestrator:
             
         # 6. Learning/Feedback phase
         # Only store the actual conversation into conversational memory
-        self.memory.store_interaction(query, final_answer)
+        self.memory.store_interaction(tenant_id, query, final_answer)
         
         # Store execution telemetry into persistent evaluation ledger
         all_issues = safety_report["issues"]
@@ -134,6 +138,7 @@ class Orchestrator:
             all_issues.append(f"Eval Flag: {eval_report.get('reason')}")
             
         self.feedback.save_feedback(
+            tenant_id=tenant_id,
             query=query, 
             response=agent_answer, # Store the RAW attempt for offline analysis
             score=eval_report.get("score", 0), 

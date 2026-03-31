@@ -51,7 +51,11 @@ def generate_po_pdf(vendor: dict, items: list, order_id: str) -> str:
     pdf.set_font("helvetica", 'I', 11)
     pdf.multi_cell(0, 10, "This order was mathematically optimized and authorized by the AIBO prediction engine based on real-time burn rates. Please process immediately. Do not exceed authorized quantities without admin override.")
     
-    os.makedirs("data/sync/orders", exist_ok=True)
-    filepath = f"data/sync/orders/AIBO_PO_{order_id}.pdf"
+    # Ensure absolute path resolution
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    out_dir = os.path.join(base_dir, "data", "sync", "orders")
+    os.makedirs(out_dir, exist_ok=True)
+    
+    filepath = os.path.join(out_dir, f"AIBO_PO_{order_id}.pdf")
     pdf.output(filepath)
     return filepath

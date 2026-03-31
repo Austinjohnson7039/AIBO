@@ -25,15 +25,15 @@ class MemoryManager:
         self.long_term = LongTermMemory()
         self.learning = LearningRetriever()
 
-    def get_context(self, query: str) -> str:
+    def get_context(self, tenant_id: int, query: str) -> str:
         """
-        Retrieves recent interactions + relevant past interactions.
+        Retrieves recent interactions + relevant past interactions scaled to the specific tenant.
         Returns a formatted markdown string ready to be injected into an LLM prompt.
         """
         context_blocks = []
         
         # 1. Short-term (Recent Conversation)
-        recent = self.short_term.get_recent()
+        recent = self.short_term.get_recent(tenant_id)
         if recent:
             context_blocks.append("--- Recent Conversation History ---")
             for interaction in recent:
@@ -41,7 +41,7 @@ class MemoryManager:
                 context_blocks.append(f"Assistant: {interaction['response']}\n")
                 
         # 2. Long-term (Relevant Past Knowledge)
-        relevant_past = self.long_term.search_memory(query)
+        relevant_past = self.long_term.search_memory(tenant_id, query)
         if relevant_past:
             context_blocks.append("--- Relevant Past Memory ---")
             for interaction in relevant_past:
@@ -49,7 +49,7 @@ class MemoryManager:
                 context_blocks.append(f"Past A: {interaction['response']}\n")
                 
         # 3. Active Learning (Golden Examples)
-        expert_examples = self.learning.get_expert_examples(query)
+        expert_examples = self.learning.get_expert_examples(tenant_id, query)
         if expert_examples:
             context_blocks.append(expert_examples)
 
@@ -58,7 +58,7 @@ class MemoryManager:
             
         return "\n".join(context_blocks)
 
-    def store_interaction(self, query: str, response: str) -> None:
-        """Saves interaction to both short and long term memory storage concurrently."""
-        self.short_term.add(query, response)
-        self.long_term.save_memory(query, response)
+    def store_interaction(self, tenant_id: int, query: str, response: str) -> None:
+        """Saves interaction to both short and long term memory storage concurrently mapped to active tenant."""
+        self.short_term.add(tenant_id, query, response)
+        self.long_term.save_memory(tenant_id, query, response)

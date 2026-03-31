@@ -77,7 +77,8 @@ def _load_inventory(db: Session) -> None:
 
     records = [
         Inventory(
-            id=int(row["Item_ID"]),
+            # BUG FIX (BUG 17): Was manually setting `id` from CSV which bypasses
+            # auto-increment and causes PK collisions with new inserts.
             item_name=row["Item_Name"],
             category=row.get("Category"),
             item_type=row.get("Type"),

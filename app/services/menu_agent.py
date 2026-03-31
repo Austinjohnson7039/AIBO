@@ -102,4 +102,41 @@ class MenuAgent:
             logger.exception("AI Menu Generation Failed: %s", e)
             return []
 
+    async def apply_autonomous_surge_pricing(self, db: Session, tenant: Tenant):
+        """
+        AUTONOMOUS ACTION:
+        If extremely bad weather is detected (e.g. Rain, Storm), automatically increase
+        pricing by 15% to capitalize on localized delivery surges, without human input. 
+        """
+        weather = await self.get_weather(tenant.location)
+        desc = weather.get("description", "").lower()
+        kind = weather.get("kind", "").lower()
+        
+        # Checking for inclement weather that drives delivery spikes
+        is_bad_weather = any(word in desc for word in ["rain", "storm", "thunder", "snow"]) or "rain" in kind or "storm" in kind
+        
+        if is_bad_weather:
+            # We autonomously lift prices of hot beverages and fast food
+            items = db.query(Inventory).filter(Inventory.tenant_id == tenant.id).all()
+            surged_items = []
+            
+            for item in items:
+                category = str(item.category).lower() if item.category else ""
+                
+                if "hot" in category or "beverage" in category or "burger" in category or "fast" in category:
+                    old_price = item.selling_price
+                    item.selling_price = round(old_price * 1.15, 2)
+                    surged_items.append(f"{item.item_name} (₹{old_price} -> ₹{item.selling_price})")
+                    
+            if surged_items:
+                db.commit()
+                # Inform admin securely out-of-band exactly what the system decided
+                from app.services.whatsapp import send_whatsapp_alert
+                msg = f"🌩️ *AIBO AUTONOMOUS SURGE ACTION*\nWeather alert triggered in {tenant.location} ({weather['description']}).\n"
+                msg += f"I have independently increased delivery-optimal prices by 15% to maximize your revenue.\n\n"
+                for s in surged_items[:5]:
+                    msg += f"• {s}\n"
+                send_whatsapp_alert(msg)
+                logger.warning(f"AUTO-ADJUST [Tenant {tenant.id}]: Surge pricing applied to {len(surged_items)} items due to bad weather.")
+        
 menu_agent = MenuAgent()

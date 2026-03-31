@@ -17,7 +17,7 @@ from app.config import GROQ_API_KEY
 
 logger = logging.getLogger(__name__)
 
-LLM_MODEL = "openai/gpt-oss-120b"
+LLM_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 
 

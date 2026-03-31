@@ -9,6 +9,11 @@ from app.config import DATABASE_URL
 engine_args = {}
 if DATABASE_URL.startswith("sqlite"):
     engine_args["connect_args"] = {"check_same_thread": False}
+elif DATABASE_URL.startswith("postgres"):
+    engine_args["pool_size"] = 10
+    engine_args["max_overflow"] = 20
+    engine_args["pool_recycle"] = 3600
+    engine_args["pool_pre_ping"] = True
 
 engine = create_engine(
     DATABASE_URL,

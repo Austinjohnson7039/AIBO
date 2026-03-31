@@ -16,14 +16,18 @@ class ShortTermMemory:
     """
 
     def __init__(self, limit: int = 5):
-        """Initialise memory with a sliding window of size `limit`."""
+        """Initialise memory with a sliding window of size `limit` strictly per tenant."""
         self.limit = limit
-        self.history: deque[Dict[str, str]] = deque(maxlen=limit)
+        self.history_map: Dict[int, deque] = {}
 
-    def add(self, query: str, response: str) -> None:
-        """Append a new query/response pair to the sliding window."""
-        self.history.append({"query": query, "response": response})
+    def add(self, tenant_id: int, query: str, response: str) -> None:
+        """Append a new query/response pair to the tenant's sliding window."""
+        if tenant_id not in self.history_map:
+            self.history_map[tenant_id] = deque(maxlen=self.limit)
+        self.history_map[tenant_id].append({"query": query, "response": response})
 
-    def get_recent(self) -> List[Dict[str, str]]:
-        """Return the recent conversation history chronologically."""
-        return list(self.history)
+    def get_recent(self, tenant_id: int) -> List[Dict[str, str]]:
+        """Return the recent conversation history chronologically for the tenant."""
+        if tenant_id in self.history_map:
+            return list(self.history_map[tenant_id])
+        return []

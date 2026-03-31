@@ -12,11 +12,12 @@ from app.db.models import Sale, Inventory
 
 logger = logging.getLogger(__name__)
 
-def record_sale_op(item: str, quantity: int, revenue: float) -> bool:
+def record_sale_op(tenant_id: int, item: str, quantity: int, revenue: float) -> bool:
     """Record a single sale line in the cloud database."""
     db = SessionLocal()
     try:
         new_sale = Sale(
+            tenant_id=tenant_id,
             item=item,
             quantity=quantity,
             revenue=revenue,
@@ -24,11 +25,11 @@ def record_sale_op(item: str, quantity: int, revenue: float) -> bool:
         )
         db.add(new_sale)
         
-        # Also update inventory stock accordingly if the item exists
-        inv_item = db.query(Inventory).filter(Inventory.item_name.like(f"%{item}%")).first()
+        # Also update inventory stock accordingly if the item exists (Exact match, Case-Insensitive)
+        inv_item = db.query(Inventory).filter(Inventory.tenant_id == tenant_id, Inventory.item_name.ilike(item)).first()
         if inv_item:
-            inv_item.stock -= quantity
-            logger.info("Stock for %s reduced by %d.", item, quantity)
+            inv_item.stock = max(0, inv_item.stock - quantity)
+            logger.info("Stock for %s reduced by %d. New Stock: %d", item, quantity, inv_item.stock)
             
         db.commit()
         return True
@@ -39,21 +40,20 @@ def record_sale_op(item: str, quantity: int, revenue: float) -> bool:
     finally:
         db.close()
 
-def add_inventory_op(item_name: str, quantity: int, reorder_level: int = 10, category: str = "Uncategorized") -> bool:
+def add_inventory_op(tenant_id: int, item_name: str, quantity: int, reorder_level: int = 10, category: str = "Uncategorized") -> bool:
     """Add stock to an existing item or create a new inventory entry."""
     db = SessionLocal()
     try:
-        inv_item = db.query(Inventory).filter(Inventory.item_name.like(f"%{item_name}%")).first()
+        # Prevent SQL overlapping substring matching vectors: Exact Match Only
+        inv_item = db.query(Inventory).filter(Inventory.tenant_id == tenant_id, Inventory.item_name.ilike(item_name)).first()
         if inv_item:
             inv_item.stock += quantity
             logger.info("Updated existing inventory: %s (+%d)", item_name, quantity)
         else:
-            # For a brand new item, we generate a new ID (highest + 1)
-            last_item = db.query(Inventory).order_by(Inventory.id.desc()).first()
-            new_id = (last_item.id + 1) if last_item else 1
-            
+            # For a brand new item, rely entirely on the DB explicitly for Primary Key Auto-Incrementation.
+            # Do NOT manually search `last_item` + 1 (Fatal Multi-Tenant collision risk).
             new_item = Inventory(
-                id=new_id,
+                tenant_id=tenant_id,
                 item_name=item_name,
                 stock=quantity,
                 reorder_level=reorder_level,
@@ -64,7 +64,7 @@ def add_inventory_op(item_name: str, quantity: int, reorder_level: int = 10, cat
                 selling_price=0.0
             )
             db.add(new_item)
-            logger.info("Added NEW inventory item: %s (%d) with ID %d", item_name, quantity, new_id)
+            logger.info("Added NEW inventory item: %s (%d) organically to the cloud backend.", item_name, quantity)
             
         db.commit()
         return True
@@ -75,13 +75,14 @@ def add_inventory_op(item_name: str, quantity: int, reorder_level: int = 10, cat
     finally:
         db.close()
 
-def update_inventory_op(item_name: str, updates: dict) -> bool:
+def update_inventory_op(tenant_id: int, item_name: str, updates: dict) -> bool:
     """Perform absolute edits (overwrites) on an existing inventory item."""
     db = SessionLocal()
     try:
-        inv_item = db.query(Inventory).filter(Inventory.item_name.like(f"%{item_name}%")).first()
+        # Match identical item ONLY (ignores pure substring similarities)
+        inv_item = db.query(Inventory).filter(Inventory.tenant_id == tenant_id, Inventory.item_name.ilike(item_name)).first()
         if not inv_item:
-            logger.warning("Attempted to update non-existent item: %s", item_name)
+            logger.warning("Attempted to update non-existent physical item: %s", item_name)
             return False
             
         # Dynamically apply updates

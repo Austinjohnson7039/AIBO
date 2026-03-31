@@ -53,11 +53,24 @@ tools = [
 ]
 
 # Initialize the LLM with tool-calling capabilities
-llm = ChatGroq(
-    model="meta-llama/llama-4-scout-17b-16e-instruct", # Latest Llama 4 Scout
-    api_key=GROQ_API_KEY,
-    temperature=0
-).bind_tools(tools)
+# BUG FIX (BUG 18): Was crashing on import if GROQ_API_KEY is empty.
+# Now fails gracefully with a clear error message instead of an import crash.
+if not GROQ_API_KEY:
+    logger.error(
+        "GROQ_API_KEY is not set. The LangGraph agent will not function. "
+        "Set GROQ_API_KEY in your .env file."
+    )
+    llm = None
+else:
+    try:
+        llm = ChatGroq(
+            model="meta-llama/llama-4-scout-17b-16e-instruct",
+            api_key=GROQ_API_KEY,
+            temperature=0
+        ).bind_tools(tools)
+    except Exception as e:
+        logger.error("Failed to initialize ChatGroq LLM: %s", e)
+        llm = None
 
 # ─── Nodes ────────────────────────────────────────────────────────────────────
 
@@ -67,6 +80,10 @@ def chatbot_node(state: State):
     It evaluates the history and decides if it needs a tool or can answer.
     """
     logger.info("Graph: Executing Chatbot Node...")
+    
+    # Guard: if LLM failed to initialize (missing API key), return graceful error
+    if llm is None:
+        return {"messages": [AIMessage(content="AI service is unavailable: GROQ_API_KEY is not configured. Please set it in your .env file.")]}
     
     try:
         # 1. Standardize all messages in state to formal LangChain objects

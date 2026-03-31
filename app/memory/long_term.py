@@ -45,10 +45,11 @@ class LongTermMemory:
             logger.error("Failed to load long term memory: %s", e)
             return []
 
-    def save_memory(self, query: str, response: str) -> None:
-        """Append a new interaction to the persistent store."""
+    def save_memory(self, tenant_id: int, query: str, response: str) -> None:
+        """Append a new interaction to the persistent store tagged securely by tenant ID."""
         memories = self.load_memory()
         entry = {
+            "tenant_id": tenant_id,
             "query": query,
             "response": response,
             "timestamp": datetime.utcnow().isoformat()
@@ -59,19 +60,24 @@ class LongTermMemory:
         except Exception as e:
             logger.error("Failed to save long term memory: %s", e)
 
-    def search_memory(self, query: str, top_k: int = 2) -> List[Dict[str, str]]:
+    def search_memory(self, tenant_id: int, query: str, top_k: int = 2) -> List[Dict[str, str]]:
         """
-        Retrieve up to top_k past interactions that share keywords with the current query.
+        Retrieve up to top_k past interactions securely matching the active tenant ID that share keywords.
         """
         memories = self.load_memory()
         if not memories:
+            return []
+
+        # STRICT ISOLATION: Filter by tenant_id first
+        tenant_mems = [m for m in memories if m.get("tenant_id") == tenant_id]
+        if not tenant_mems:
             return []
 
         # Simple lightweight token intersection scoring
         query_words = set(query.lower().split())
         scored_memories = []
         
-        for mem in memories:
+        for mem in tenant_mems:
             # Check against both the stored query and response
             mem_text = f"{mem['query']} {mem['response']}".lower()
             score = sum(1 for word in query_words if word in mem_text)

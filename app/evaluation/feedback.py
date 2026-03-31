@@ -42,15 +42,19 @@ class FeedbackStore:
             return []
 
     def save_feedback(
-        self, query: str, response: str, score: int, issues: list[str]
+        self, tenant_id: int, query: str, response: str, score: int, issues: list[str]
     ) -> None:
-        """Append a newly evaluated interaction object to the persistent store."""
+        """Append a newly evaluated interaction object to the persistent store natively isolated by schema ID."""
+        from datetime import datetime
         feedbacks = self.load_feedback()
         feedbacks.append({
+            "tenant_id": tenant_id,
             "query": query,
             "response": response,
             "score": score,
-            "issues": issues
+            "issues": issues,
+            # BUG FIX (BUG 15): Was missing timestamp. Required for recency-weighted learning.
+            "timestamp": datetime.utcnow().isoformat()
         })
         try:
             self.filepath.write_text(json.dumps(feedbacks, indent=2), encoding="utf-8")

@@ -50,8 +50,10 @@ def run_procurement_cycle(db: Session, tenant_id: int):
         dispatched_count = 0
         details = []
         for vid, items in vendor_batches.items():
-            # Rule 2: Smart Batching > 3 items
-            if len(items) > 3:
+            # BUG FIX (BUG 11): Threshold was >3 items, meaning most single-vendor cafes
+            # with <4 critical ingredients NEVER got an auto-PO dispatched.
+            # Now triggers for ANY vendor with >= 1 critical item.
+            if len(items) >= 1:
                 vendor = db.query(Vendor).filter(Vendor.id == vid, Vendor.tenant_id == tenant_id).first()
                 if not vendor: continue
                 

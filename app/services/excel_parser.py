@@ -13,20 +13,26 @@ def fuzzy_map_columns(df: pd.DataFrame) -> pd.DataFrame:
     raw_cols = df.columns.tolist()
     clean_cols = [str(c).lower().strip().replace(' ', '_') for c in raw_cols]
     
-    # 1. Map Item
+    # 1. Map Date
+    date_keywords = ['date', 'time', 'timestamp', 'day']
+    for raw, clean in zip(raw_cols, clean_cols):
+        if raw not in column_mapping and any(kw in clean for kw in date_keywords):
+            column_mapping[raw] = 'date'
+            
+    # 2. Map Item
     item_keywords = ['item', 'product', 'name', 'menu', 'dish', 'beverage', 'sku', 'description']
     for raw, clean in zip(raw_cols, clean_cols):
         if any(kw in clean for kw in item_keywords) and 'item' not in column_mapping.values():
             column_mapping[raw] = 'item'
             
-    # 2. Map Quantity
+    # 3. Map Quantity
     qty_keywords = ['qty', 'quantity', 'count', 'sold', 'units', 'volume']
     for raw, clean in zip(raw_cols, clean_cols):
         # Prioritize exact matches like 'qty' or 'quantity' over 'amount' which could be money
         if raw not in column_mapping and any(kw in clean for kw in qty_keywords):
             column_mapping[raw] = 'quantity'
             
-    # 3. Map Revenue
+    # 4. Map Revenue
     rev_keywords = ['rev', 'revenue', 'price', 'total', 'sales', 'amount', 'inr', 'rs']
     for raw, clean in zip(raw_cols, clean_cols):
         if raw not in column_mapping and any(kw in clean for kw in rev_keywords):
@@ -43,10 +49,17 @@ def fuzzy_map_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.rename(columns=column_mapping)
     
     # Filter and clean
-    df = df[['item', 'quantity', 'revenue']]
+    cols_to_keep = ['item', 'quantity', 'revenue']
+    if 'date' in df.columns:
+        cols_to_keep.append('date')
+        
+    df = df[cols_to_keep]
     df = df.dropna(subset=['item', 'quantity'])
     
     # Ensure types
+    if 'date' in df.columns:
+        df['date'] = pd.to_datetime(df['date'], errors='coerce')
+        
     df['quantity'] = pd.to_numeric(df['quantity'], errors='coerce').fillna(0).astype(int)
     df['revenue'] = pd.to_numeric(df['revenue'], errors='coerce').fillna(0.0).astype(float)
     df['item'] = df['item'].astype(str)
