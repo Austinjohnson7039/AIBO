@@ -102,13 +102,20 @@ async def get_smart_menu(tenant: Tenant = Depends(get_current_tenant), db: Sessi
 async def get_trends(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
     return forecasting_engine.get_marketing_insights(db, tenant.id)
 
-from app.agents.manager import ManagerAgent
-from app.agents.analyst import AnalystAgent
-from app.agents.operations import OperationsAgent
+_manager_agent = None
+_analyst_agent = None
+_operations_agent = None
 
-manager_agent = ManagerAgent()
-analyst_agent = AnalystAgent()
-operations_agent = OperationsAgent()
+def get_agents():
+    global _manager_agent, _analyst_agent, _operations_agent
+    if _manager_agent is None:
+        from app.agents.manager import ManagerAgent
+        from app.agents.analyst import AnalystAgent
+        from app.agents.operations import OperationsAgent
+        _manager_agent = ManagerAgent()
+        _analyst_agent = AnalystAgent()
+        _operations_agent = OperationsAgent()
+    return _manager_agent, _analyst_agent, _operations_agent
 
 class QueryRequest(BaseModel):
     query: str
@@ -118,6 +125,8 @@ async def query_ai(req: QueryRequest, tenant: Tenant = Depends(get_current_tenan
     """
     Agentic RAG Node: Routes and processes business intelligence and operational queries.
     """
+    manager_agent, analyst_agent, operations_agent = get_agents()
+    
     # 1. Classify intent
     intent = manager_agent.decide_agent(req.query)
     
@@ -165,18 +174,26 @@ async def upload_excel_sales(
     try:
         df = pd.read_excel(io.BytesIO(contents))
         clean_df = fuzzy_map_columns(df)
+        records_list = clean_df.to_dict('records')
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=400, detail="Could not read the uploaded Excel file. Please download the template and try again.")
     
-    processed = 0
-    for _, row in clean_df.iterrows():
-        stock_engine.record_sale_and_deduct(db, tenant.id, str(row['item']), int(row['quantity']), float(row['revenue']))
-        processed += 1
-    
-    background_tasks.add_task(run_procurement_cycle, db, tenant.id)
-    return {"status": "success", "message": f"Processed {processed} sales. Agent triggered."}
+    def _process_excel_bg(t_id: int, records: list):
+        from app.db.database import SessionLocal
+        bg_db = SessionLocal()
+        try:
+            processed = 0
+            for row in records:
+                stock_engine.record_sale_and_deduct(bg_db, t_id, str(row['item']), int(row['quantity']), float(row['revenue']))
+                processed += 1
+            run_procurement_cycle(bg_db, t_id)
+        finally:
+            bg_db.close()
+            
+    background_tasks.add_task(_process_excel_bg, tenant.id, records_list)
+    return {"status": "success", "message": f"Excel uploaded! Processed {len(records_list)} sales in the background. Agent triggered."}
 
 @router.get("/sync/template", tags=["Sync"])
 async def download_excel_template():

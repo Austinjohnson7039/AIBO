@@ -107,18 +107,16 @@ async def get_trends(tenant: Tenant = Depends(get_current_tenant), db: Session =
 async def get_experimentation(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
     return experimentation_engine.generate_strategy(db, tenant.id)
 
-from app.agents.manager import ManagerAgent
-from app.agents.analyst import AnalystAgent
-from app.agents.operations import OperationsAgent
+# Unused agent imports removed to prevent heavy loading on startup.
+# Lazy-load Orchestrator to prevent FAISS disk I/O and heavy model loading during FastAPI startup
+_orchestrator = None
 
-manager_agent = ManagerAgent()
-analyst_agent = AnalystAgent()
-operations_agent = OperationsAgent()
-
-# BUG FIX: Instantiate Orchestrator ONCE as a module-level singleton.
-# Previously created on every /query/ request which triggered FAISS disk I/O each time.
-from app.services.orchestrator import Orchestrator
-_orchestrator = Orchestrator()
+def get_orchestrator():
+    global _orchestrator
+    if _orchestrator is None:
+        from app.services.orchestrator import Orchestrator
+        _orchestrator = Orchestrator()
+    return _orchestrator
 
 class QueryRequest(BaseModel):
     query: str
@@ -127,10 +125,11 @@ class QueryRequest(BaseModel):
 async def query_ai(req: QueryRequest, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
     """
     Agentic RAG Node: Routes and processes business intelligence and operational queries.
-    BUG FIX: Orchestrator is now a module-level singleton to avoid FAISS disk I/O on
-    every single request (was causing ~500ms latency spike per query).
+    BUG FIX: Orchestrator is now lazily-loaded to avoid FAISS disk I/O on
+    startup, ensuring the backend starts instantly.
     """
-    result = _orchestrator.handle(tenant.id, req.query)
+    orchestrator = get_orchestrator()
+    result = orchestrator.handle(tenant.id, req.query)
     return result
 
 # ─── Sync (POS Upload) ────────────────────────────────────────────────────────
@@ -149,26 +148,31 @@ async def upload_excel_sales(
     try:
         df = pd.read_excel(io.BytesIO(contents))
         clean_df = fuzzy_map_columns(df)
+        # Convert DataFrame to list of dicts for background processing
+        records_list = clean_df.to_dict('records')
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=400, detail="Could not read the uploaded Excel file. Please download the template and try again.")
     
-    processed = 0
-    for _, row in clean_df.iterrows():
-        sale_date = row['date'] if 'date' in row and not pd.isna(row['date']) else None
-        stock_engine.record_sale_and_deduct(db, tenant.id, str(row['item']), int(row['quantity']), float(row['revenue']), sale_date)
-        processed += 1
-    
-    def _run_procurement_bg(t_id: int):
+    def _process_excel_bg(t_id: int, records: list):
         bg_db = SessionLocal()
         try:
+            processed = 0
+            for row in records:
+                sale_date = row['date'] if 'date' in row and not pd.isna(row['date']) else None
+                stock_engine.record_sale_and_deduct(bg_db, t_id, str(row['item']), int(row['quantity']), float(row['revenue']), sale_date)
+                processed += 1
+            # Run procurement cycle after processing all sales
             run_procurement_cycle(bg_db, t_id)
         finally:
             bg_db.close()
             
-    background_tasks.add_task(_run_procurement_bg, tenant.id)
-    return {"status": "success", "message": f"Processed {processed} sales. Agent triggered."}
+    background_tasks.add_task(_process_excel_bg, tenant.id, records_list)
+    
+    # Return immediately while processing happens in the background
+    num_records = len(records_list)
+    return {"status": "success", "message": f"Excel uploaded! Processed {num_records} sales in the background. Agent triggered."}
 
 @router.get("/sync/template", tags=["Sync"])
 async def download_excel_template():

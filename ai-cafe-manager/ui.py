@@ -15,7 +15,7 @@ from pathlib import Path
 
 # Default to localhost for internal container communication if not specified
 _BACKEND_BASE = os.getenv("BACKEND_URL", "http://localhost:8001")
-API_URL = f"{_BACKEND_BASE.rstrip('/')}/query/"
+API_URL = f"{_BACKEND_BASE.rstrip('/')}/api/query/"
 
 # Security Credentials
 ADMIN_USER = os.getenv("APP_USERNAME", "admin")
@@ -369,6 +369,28 @@ def main():
                         st.rerun()
                 except Exception as e:
                     st.error(f"Sync failed: {e}")
+
+        st.markdown("---")
+        st.subheader("📊 Bulk Sales Upload")
+        uploaded_file = st.file_uploader("Upload POS Excel Export (.xlsx, .xls)", type=["xlsx", "xls"])
+        if uploaded_file is not None:
+            if st.button("📤 Process Sales Data"):
+                with st.spinner("Uploading and triggers agents..."):
+                    try:
+                        # Prepare the file for the POST request
+                        files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
+                        # Use the /sync/upload/excel endpoint
+                        upload_url = API_URL.replace("/query/", "/sync/upload/excel")
+                        resp = requests.post(upload_url, files=files, timeout=30)
+                        
+                        if resp.status_code == 200:
+                            res_data = resp.json()
+                            st.success(f"✅ {res_data.get('message', 'Upload successful!')}")
+                            st.balloons() # Added for "fun" / acknowledgement
+                        else:
+                            st.error(f"Upload failed: {resp.text}")
+                    except Exception as e:
+                        st.error(f"An error occurred: {e}")
 
         st.markdown("---")
         st.info("Check the AI's memory and internal evaluation logs.")
