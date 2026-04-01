@@ -17,7 +17,7 @@ from openai import OpenAI, OpenAIError
 
 from app.config import GROQ_API_KEY
 from app.db.database import SessionLocal
-from app.db.models import Sale, Ingredient, Employee, Attendance, Wastage
+from app.db.models import Sale, Ingredient, Employee, Attendance, Wastage, Vendor, PurchaseOrder, Recipe, Inventory
 
 logger = logging.getLogger(__name__)
 
@@ -202,6 +202,77 @@ class AnalystAgent:
                 context_blocks.append("\n".join(was_lines))
             else:
                 context_blocks.append("No recent wastage logged.")
+
+            # ── Vendors / Suppliers ────────────────────────────────────────
+            vendors = db.query(Vendor).filter(Vendor.tenant_id == tenant_id).all()
+            context_blocks.append("")
+            context_blocks.append("=== VENDORS & SUPPLIERS ===")
+            if vendors:
+                v_lines = []
+                for v in vendors:
+                    v_lines.append(f"- {v.name} | Contact: {v.contact_name or 'N/A'} | WhatsApp: {v.whatsapp_number or 'N/A'} | Category: {v.category or 'General'}")
+                context_blocks.append("\n".join(v_lines))
+            else:
+                context_blocks.append("No vendors registered.")
+
+            # ── Procurement / Purchase Orders ─────────────────────────────
+            pending_pos = db.query(PurchaseOrder).filter(
+                PurchaseOrder.tenant_id == tenant_id,
+                PurchaseOrder.status == "AUTO_DISPATCHED"
+            ).all()
+            fulfilled_pos = db.query(PurchaseOrder).filter(
+                PurchaseOrder.tenant_id == tenant_id,
+                PurchaseOrder.status == "FULFILLED"
+            ).order_by(PurchaseOrder.created_at.desc()).limit(10).all()
+            
+            context_blocks.append("")
+            context_blocks.append("=== PROCUREMENT & PURCHASE ORDERS ===")
+            if pending_pos:
+                context_blocks.append(f"PENDING Orders ({len(pending_pos)}):")
+                for po in pending_pos:
+                    vendor = db.query(Vendor).filter(Vendor.id == po.vendor_id).first()
+                    v_name = vendor.name if vendor else "Unknown"
+                    context_blocks.append(f"  - PO #{po.id} → {v_name} | Items: {po.items_json} | Created: {po.created_at.strftime('%Y-%m-%d') if po.created_at else 'N/A'}")
+            else:
+                context_blocks.append("No pending procurement orders.")
+            
+            if fulfilled_pos:
+                context_blocks.append(f"Recently Fulfilled ({len(fulfilled_pos)}):")
+                for po in fulfilled_pos:
+                    vendor = db.query(Vendor).filter(Vendor.id == po.vendor_id).first()
+                    v_name = vendor.name if vendor else "Unknown"
+                    context_blocks.append(f"  - PO #{po.id} → {v_name} | Fulfilled on: {po.created_at.strftime('%Y-%m-%d') if po.created_at else 'N/A'}")
+
+            # ── Recipes (Menu Item → Ingredient Mapping) ──────────────────
+            recipes = db.query(Recipe).filter(Recipe.tenant_id == tenant_id).all()
+            context_blocks.append("")
+            context_blocks.append("=== RECIPES (Menu → Ingredients Mapping) ===")
+            if recipes:
+                from collections import defaultdict
+                recipe_map = defaultdict(list)
+                for r in recipes:
+                    recipe_map[r.menu_item].append(f"{r.quantity_per_unit} {r.unit or ''} of {r.ingredient}")
+                for menu_item, ingredients in recipe_map.items():
+                    context_blocks.append(f"  {menu_item}: {', '.join(ingredients)}")
+            else:
+                context_blocks.append("No recipe mappings configured.")
+
+            # ── Menu Items & Profit Margins ───────────────────────────────
+            menu_items = db.query(Inventory).filter(Inventory.tenant_id == tenant_id).all()
+            context_blocks.append("")
+            context_blocks.append("=== MENU ITEMS & PROFIT MARGINS ===")
+            if menu_items:
+                margin_lines = []
+                for mi in menu_items:
+                    margin = mi.selling_price - mi.cost_price if mi.selling_price and mi.cost_price else 0
+                    margin_pct = (margin / mi.selling_price * 100) if mi.selling_price and mi.selling_price > 0 else 0
+                    margin_lines.append(
+                        f"- {mi.item_name} | Stock: {mi.stock} | Cost: ₹{mi.cost_price} | "
+                        f"Selling: ₹{mi.selling_price} | Margin: ₹{margin:.2f} ({margin_pct:.1f}%)"
+                    )
+                context_blocks.append("\n".join(margin_lines))
+            else:
+                context_blocks.append("No menu items configured in inventory.")
 
             return "\n".join(context_blocks)
 

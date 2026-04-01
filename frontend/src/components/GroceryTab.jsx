@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { getDashboard, getVendors, addVendor, restockGrocery, addGrocery, removeGrocery, listPendingOrders, confirmOrder, updateGrocery } from '../api.js';
+import { useState, useEffect, useRef } from 'react';
+import { getDashboard, getVendors, addVendor, restockGrocery, addGrocery, removeGrocery, listPendingOrders, confirmOrder, updateGrocery, uploadIngredientExcel, downloadIngredientTemplate } from '../api.js';
 import CafeLoader from './CafeLoader.jsx';
 
 const CATEGORIES = ['Dairy', 'Coffee Beans', 'Syrups', 'Bakery', 'Packaging', 'Spices', 'Beverages', 'Other'];
@@ -14,6 +14,9 @@ export default function GroceryTab() {
   const [expandedItem, setExpandedItem] = useState(null);
   const [pending, setPending] = useState([]);
   const [confirming, setConfirming] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const [newItem, setNewItem] = useState({
     ingredient_name: '', category: 'Dairy', unit: 'kg',
@@ -130,6 +133,31 @@ export default function GroceryTab() {
     setTimeout(() => setMsg(''), 4000);
   };
 
+  const handleExcelUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const res = await uploadIngredientExcel(file);
+      setMsg(`✓ ${res.message}`);
+      refresh();
+    } catch (err) {
+      setMsg(`✕ ${err.message}`);
+    }
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    setTimeout(() => setMsg(''), 5000);
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      await downloadIngredientTemplate();
+    } catch {
+      setMsg('✕ Failed to download template');
+      setTimeout(() => setMsg(''), 3000);
+    }
+  };
+
   if (loading) return <CafeLoader />;
 
   const inventory = data?.inventory || [];
@@ -146,10 +174,56 @@ export default function GroceryTab() {
             </span>
           )}
         </div>
-        <button className="btn btn-primary" onClick={() => setShowAdd(!showAdd)}>
-          {showAdd ? '✕ Cancel' : '+ Add Ingredient'}
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-ghost" onClick={() => setShowUpload(!showUpload)} style={{ fontSize: 12 }}>
+            {showUpload ? '✕ Cancel' : '📤 Bulk Upload'}
+          </button>
+          <button className="btn btn-primary" onClick={() => setShowAdd(!showAdd)}>
+            {showAdd ? '✕ Cancel' : '+ Add Ingredient'}
+          </button>
+        </div>
       </div>
+
+      {/* Excel Bulk Upload Panel */}
+      {showUpload && (
+        <div className="card" style={{ marginBottom: 20, border: '1px dashed var(--primary)', background: 'rgba(139, 92, 246, 0.03)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+            <span style={{ fontSize: 20 }}>📊</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--text-primary)' }}>Bulk Ingredient Upload</div>
+              <div style={{ fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5 }}>
+                Upload an Excel file (.xlsx) with your ingredients. We'll auto-detect columns. Existing items get updated, new ones get added.
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <label className="btn btn-primary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+              {uploading ? (
+                <><div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Processing...</>
+              ) : (
+                <><span>📁</span> Choose Excel File</>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleExcelUpload}
+                style={{ display: 'none' }}
+                disabled={uploading}
+              />
+            </label>
+            <button className="btn btn-ghost" onClick={handleDownloadTemplate} style={{ fontSize: 12 }}>
+              ⬇️ Download Template
+            </button>
+          </div>
+
+          <div style={{ marginTop: 12, fontSize: 10, color: 'var(--text-dim)', lineHeight: 1.6 }}>
+            <strong>Expected columns:</strong> Ingredient Name (required), Category, Unit, Current Stock, Reorder Level, Unit Cost (INR).
+            Missing columns will use smart defaults.
+          </div>
+        </div>
+      )}
 
       {/* Status message */}
       {msg && (

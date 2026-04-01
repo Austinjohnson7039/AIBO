@@ -21,14 +21,30 @@ class MemoryManager:
     """
 
     def __init__(self):
-        self.short_term = ShortTermMemory()
+        self.short_term = ShortTermMemory(limit=10)
         self.long_term = LongTermMemory()
         self.learning = LearningRetriever()
+
+    def get_chat_messages(self, tenant_id: int) -> List[Dict[str, str]]:
+        """
+        Returns structured conversation history as a list of role/content dicts
+        suitable for direct injection into LangChain message lists.
+        
+        Returns:
+            List of dicts like [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]
+        """
+        recent = self.short_term.get_recent(tenant_id)
+        messages = []
+        for interaction in recent:
+            messages.append({"role": "user", "content": interaction["query"]})
+            messages.append({"role": "assistant", "content": interaction["response"]})
+        return messages
 
     def get_context(self, tenant_id: int, query: str) -> str:
         """
         Retrieves recent interactions + relevant past interactions scaled to the specific tenant.
         Returns a formatted markdown string ready to be injected into an LLM prompt.
+        Used for the Evaluator grounding context (NOT for the LLM conversation history).
         """
         context_blocks = []
         

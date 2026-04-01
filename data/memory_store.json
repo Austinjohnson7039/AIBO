@@ -653,5 +653,17 @@
     "query": "Predict sales for next week",
     "response": "Next week's sales are predicted to be around \u20b9135,000.",
     "timestamp": "2026-03-29T03:08:51.073055"
+  },
+  {
+    "tenant_id": 1,
+    "query": "What are sales?",
+    "response": "Total is 5000",
+    "timestamp": "2026-04-01T14:12:44.013545"
+  },
+  {
+    "tenant_id": 1,
+    "query": "Tell me more",
+    "response": "Your top item is Latte",
+    "timestamp": "2026-04-01T14:12:44.022430"
   }
 ]

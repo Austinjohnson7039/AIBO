@@ -98,7 +98,95 @@ async def update_grocery(req: AddGroceryRequest, tenant: Tenant = Depends(get_cu
     )
     return {"status": "success" if success else "error", "message": msg}
 
-# ─── Analytics & Smart Menu ───────────────────────────────────────────────────
+@router.post("/grocery/upload/excel", tags=["Grocery"])
+async def upload_ingredient_excel(
+    file: UploadFile = File(...),
+    tenant: Tenant = Depends(get_current_tenant),
+    db: Session = Depends(get_db)
+):
+    """Bulk upload ingredients from an Excel file with fuzzy column mapping."""
+    if not file.filename.endswith(('.xlsx', '.xls')):
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload an .xlsx or .xls file.")
+    
+    contents = await file.read()
+    try:
+        from app.services.ingredient_excel_parser import fuzzy_map_ingredient_columns
+        df = pd.read_excel(io.BytesIO(contents))
+        clean_df = fuzzy_map_ingredient_columns(df)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Could not read the uploaded Excel file. Please download the AIBO Ingredient Template and try again.")
+    
+    added = 0
+    skipped = 0
+    errors = []
+    
+    for _, row in clean_df.iterrows():
+        try:
+            # Check if ingredient already exists
+            existing = db.query(Ingredient).filter(
+                Ingredient.tenant_id == tenant.id,
+                Ingredient.ingredient_name == row['ingredient_name']
+            ).first()
+            
+            if existing:
+                # Update existing ingredient
+                existing.category = row['category']
+                existing.unit = row['unit']
+                existing.current_stock = float(row['current_stock'])
+                existing.reorder_level = float(row['reorder_level'])
+                existing.unit_cost_inr = float(row['unit_cost_inr'])
+                added += 1
+            else:
+                # Create new ingredient
+                new_ing = Ingredient(
+                    tenant_id=tenant.id,
+                    ingredient_name=row['ingredient_name'],
+                    category=row['category'],
+                    unit=row['unit'],
+                    current_stock=float(row['current_stock']),
+                    reorder_level=float(row['reorder_level']),
+                    unit_cost_inr=float(row['unit_cost_inr'])
+                )
+                db.add(new_ing)
+                added += 1
+        except Exception as e:
+            skipped += 1
+            errors.append(f"{row.get('ingredient_name', 'Unknown')}: {str(e)}")
+    
+    db.commit()
+    
+    msg = f"Successfully processed {added} ingredient(s)."
+    if skipped:
+        msg += f" Skipped {skipped} row(s) due to errors."
+    
+    return {
+        "status": "success",
+        "message": msg,
+        "added": added,
+        "skipped": skipped,
+        "errors": errors[:5]  # Return max 5 error details
+    }
+
+@router.get("/grocery/template", tags=["Grocery"])
+async def download_ingredient_template():
+    """Provides a pre-formatted Excel template for bulk ingredient upload."""
+    df = pd.DataFrame([
+        {"Ingredient Name": "Arabica Coffee Beans", "Category": "Coffee Beans", "Unit": "kg", "Current Stock": 25.0, "Reorder Level": 5.0, "Unit Cost (INR)": 850.00},
+        {"Ingredient Name": "Whole Milk", "Category": "Dairy", "Unit": "L", "Current Stock": 40.0, "Reorder Level": 10.0, "Unit Cost (INR)": 56.00},
+        {"Ingredient Name": "Vanilla Syrup", "Category": "Syrups", "Unit": "L", "Current Stock": 8.0, "Reorder Level": 2.0, "Unit Cost (INR)": 320.00},
+        {"Ingredient Name": "Croissants", "Category": "Bakery", "Unit": "pcs", "Current Stock": 50.0, "Reorder Level": 15.0, "Unit Cost (INR)": 45.00},
+    ])
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Ingredients_Template')
+    output.seek(0)
+    
+    headers = {
+        'Content-Disposition': 'attachment; filename="AIBO_Ingredient_Template.xlsx"'
+    }
+    return StreamingResponse(output, headers=headers, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 @router.get("/analytics/forecast/", tags=["Analytics"])
 async def get_forecast(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):

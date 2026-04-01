@@ -133,3 +133,25 @@ export const getStaffingRecommendation = () => request('GET', '/analytics/staffi
 // ── Wastage ──────────────────────────────────────────────────────────────────
 export const getWastage = () => request('GET', '/wastage/');
 export const addWastage = (data) => request('POST', '/wastage/add/', data);
+
+// ── Grocery Excel Upload ─────────────────────────────────────────────────────
+export async function uploadIngredientExcel(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  return request('POST', '/grocery/upload/excel', formData, true);
+}
+
+export async function downloadIngredientTemplate() {
+  const token = localStorage.getItem('aibo_token');
+  const res = await fetch(`${BASE}/grocery/template`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to download template');
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'AIBO_Ingredient_Template.xlsx';
+  a.click();
+}
