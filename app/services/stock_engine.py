@@ -58,6 +58,19 @@ class StockEngine:
         try:
             # 1. Record Sale
             s_date = sale_date if sale_date and not pd.isna(sale_date) else datetime.utcnow()
+            
+            # IDEMPOTENCY CHECK: Resolve duplicate key issues from repeated Excel uploads
+            existing_sale = db.query(Sale).filter(
+                Sale.tenant_id == tenant_id,
+                Sale.item == item_name,
+                Sale.quantity == quantity,
+                Sale.revenue == revenue,
+                Sale.sale_date == s_date
+            ).first()
+            if existing_sale:
+                logger.debug(f"Skipping duplicate sale for {item_name} on {s_date}. Already processed.")
+                return
+
             new_sale = Sale(tenant_id=tenant_id, item=item_name, quantity=quantity, revenue=revenue, sale_date=s_date)
             db.add(new_sale)
             
@@ -157,6 +170,8 @@ class StockEngine:
         # ── Advanced Reports Generation ──
         advanced_reports = {
             "daily_sales": [],
+            "weekly_sales": [],
+            "monthly_sales": [],
             "category_performance": [],
             "peak_hours": [],
             "gross_margin_pct": 0.0,
@@ -171,6 +186,20 @@ class StockEngine:
                 daily_grp["date_str"] = daily_grp["date_only"].astype(str)
                 dr = daily_grp[["date_str", "revenue"]].rename(columns={"date_str": "date"}).to_dict('records')
                 advanced_reports["daily_sales"] = [{"date": r["date"], "revenue": float(r["revenue"])} for r in dr]
+
+            # 1b. Weekly Sales
+            recent_weeks = sales[sales["date"] >= (now - timedelta(weeks=8))]
+            if not recent_weeks.empty:
+                recent_weeks["week"] = recent_weeks["date"].dt.to_period('W').apply(lambda r: r.start_time.strftime("%Y-%m-%d"))
+                weekly_grp = recent_weeks.groupby("week")["revenue"].sum().reset_index()
+                advanced_reports["weekly_sales"] = [{"week": str(r["week"]), "revenue": float(r["revenue"])} for r in weekly_grp.to_dict('records')]
+
+            # 1c. Monthly Sales
+            recent_months = sales[sales["date"] >= (now - timedelta(days=180))]
+            if not recent_months.empty:
+                recent_months["month"] = recent_months["date"].dt.to_period('M').astype(str)
+                monthly_grp = recent_months.groupby("month")["revenue"].sum().reset_index()
+                advanced_reports["monthly_sales"] = [{"month": str(r["month"]), "revenue": float(r["revenue"])} for r in monthly_grp.to_dict('records')]
             
             # 2. Category Performance
             category_sales = sales.copy()
