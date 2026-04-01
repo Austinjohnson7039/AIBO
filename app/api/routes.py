@@ -77,6 +77,7 @@ class AddGroceryRequest(BaseModel):
     current_stock: float
     reorder_level: float
     unit_cost_inr: float
+    vendor_id: Optional[int] = None
 
 @router.post("/grocery/add/", tags=["Grocery"])
 async def add_grocery(req: AddGroceryRequest, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
@@ -86,6 +87,15 @@ async def add_grocery(req: AddGroceryRequest, tenant: Tenant = Depends(get_curre
 @router.delete("/grocery/remove/", tags=["Grocery"])
 async def remove_grocery(ingredient_name: str, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
     success, msg = stock_engine.remove_grocery_item(db, tenant.id, ingredient_name)
+    return {"status": "success" if success else "error", "message": msg}
+    
+@router.patch("/grocery/update/", tags=["Grocery"])
+async def update_grocery(req: AddGroceryRequest, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    # Re-use AddGroceryRequest schema for updates as well
+    success, msg = stock_engine.add_ingredient(
+        db, tenant.id, req.ingredient_name, req.category, req.unit, 
+        req.current_stock, req.reorder_level, req.unit_cost_inr, req.vendor_id
+    )
     return {"status": "success" if success else "error", "message": msg}
 
 # ─── Analytics & Smart Menu ───────────────────────────────────────────────────

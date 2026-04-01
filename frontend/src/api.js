@@ -63,6 +63,7 @@ export const getDashboard = () => request('GET', '/dashboard/');
 export const restockGrocery = (ingredient_name, added_amount) =>
   request('POST', '/grocery/restock/', { ingredient_name, added_amount });
 export const addGrocery = (data) => request('POST', '/grocery/add/', data);
+export const updateGrocery = (data) => request('PATCH', '/grocery/update/', data);
 export const removeGrocery = (ingredient_name) =>
   request('DELETE', `/grocery/remove/?ingredient_name=${encodeURIComponent(ingredient_name)}`);
 

@@ -15,7 +15,8 @@ export default function GroceryTab() {
 
   const [newItem, setNewItem] = useState({
     ingredient_name: '', category: 'Dairy', unit: 'kg',
-    current_stock: '', reorder_level: '', unit_cost_inr: ''
+    current_stock: '', reorder_level: '', unit_cost_inr: '',
+    vendor_id: ''
   });
   const [newVendor, setNewVendor] = useState({ name: '', contact_name: '', whatsapp_number: '', category: 'Dairy' });
 
@@ -51,7 +52,7 @@ export default function GroceryTab() {
       };
       await addGrocery(payload);
       setShowAdd(false);
-      setNewItem({ ingredient_name: '', category: 'Dairy', unit: 'kg', current_stock: '', reorder_level: '', unit_cost_inr: '' });
+      setNewItem({ ingredient_name: '', category: 'Dairy', unit: 'kg', current_stock: '', reorder_level: '', unit_cost_inr: '', vendor_id: '' });
       setMsg('✓ Ingredient added successfully.');
       refresh();
     } catch (e) { setMsg(`✕ ${e.message}`); }
@@ -72,9 +73,28 @@ export default function GroceryTab() {
     e.preventDefault();
     try {
       await addVendor(newVendor);
-      setVendors(prev => [...prev, { ...newVendor }]);
+      const updated = await getVendors();
+      setVendors(updated.vendors || []);
       setNewVendor({ name: '', contact_name: '', whatsapp_number: '', category: 'Dairy' });
       setMsg('✓ Supplier added.');
+    } catch (e) { setMsg(`✕ ${e.message}`); }
+    setTimeout(() => setMsg(''), 3000);
+  };
+
+  const handleUpdateVendor = async (item, vid) => {
+    try {
+      const payload = {
+        ingredient_name: item.ingredient_name,
+        category: item.category,
+        unit: item.unit,
+        current_stock: item.current_stock,
+        reorder_level: item.reorder_level,
+        unit_cost_inr: item.unit_cost_inr,
+        vendor_id: vid === '' ? null : parseInt(vid)
+      };
+      await updateGrocery(payload);
+      setMsg(`✓ Updated supplier for ${item.ingredient_name}`);
+      refresh();
     } catch (e) { setMsg(`✕ ${e.message}`); }
     setTimeout(() => setMsg(''), 3000);
   };
@@ -145,6 +165,13 @@ export default function GroceryTab() {
                 <input className="input" type="number" step="0.01" min="0" value={newItem.unit_cost_inr}
                   onChange={e => setNewItem({...newItem, unit_cost_inr: e.target.value})} />
               </div>
+              <div>
+                <label className="form-label">Supplier (Optional)</label>
+                <select className="select" value={newItem.vendor_id} onChange={e => setNewItem({...newItem, vendor_id: e.target.value})}>
+                  <option value="">No Supplier Assigned</option>
+                  {vendors.map(v => <option key={v.id} value={v.id}>{v.name} ({v.category})</option>)}
+                </select>
+              </div>
             </div>
             <button className="btn btn-primary" type="submit">Save Ingredient</button>
           </form>
@@ -166,12 +193,13 @@ export default function GroceryTab() {
                 <th>Stock</th>
                 <th>Reorder At</th>
                 <th>Status</th>
+                <th>Assigned Supplier</th>
                 <th style={{ paddingRight: 16 }}>Restock</th>
               </tr>
             </thead>
             <tbody>
               {inventory.length === 0 ? (
-                <tr><td colSpan="6" style={{ padding: 40, textAlign: 'center', color: 'var(--text-dim)', fontSize: 13 }}>
+                <tr><td colSpan="7" style={{ padding: 40, textAlign: 'center', color: 'var(--text-dim)', fontSize: 13 }}>
                   No ingredients yet. Add your first one above.
                 </td></tr>
               ) : inventory.map((item, i) => {
@@ -199,6 +227,18 @@ export default function GroceryTab() {
                       <span className={`badge ${isLow ? 'badge-danger' : 'badge-success'}`}>
                         {isLow ? 'Low Stock' : 'In Stock'}
                       </span>
+                    </td>
+                    <td>
+                      <select 
+                        className="select" 
+                        style={{ fontSize: 11, padding: '4px 6px', height: 'auto', minWidth: 120 }}
+                        value={item.vendor_id || ''}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => handleUpdateVendor(item, e.target.value)}
+                      >
+                        <option value="">Unassigned</option>
+                        {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+                      </select>
                     </td>
                     <td style={{ paddingRight: 16 }}>
                       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
