@@ -23,14 +23,25 @@ export default function GroceryTab() {
   const [newVendor, setNewVendor] = useState({ name: '', contact_name: '', whatsapp_number: '', category: 'Dairy' });
 
   useEffect(() => {
-    Promise.all([getDashboard(), getVendors(), listPendingOrders()])
-      .then(([d, v, p]) => { 
-        setData(d); 
-        setVendors(v.vendors || []); 
-        setPending(p.pending || []);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [dash, vends, pend] = await Promise.allSettled([
+          getDashboard(),
+          getVendors(),
+          listPendingOrders()
+        ]);
+        
+        if (dash.status === 'fulfilled') setData(dash.value);
+        if (vends.status === 'fulfilled') setVendors(vends.value.vendors || []);
+        if (pend.status === 'fulfilled') setPending(pend.value.pending || []);
+      } catch (err) {
+        console.error("Dashboard Load Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   const refresh = () => {

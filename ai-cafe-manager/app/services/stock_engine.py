@@ -22,7 +22,8 @@ class StockEngine:
             "unit": i.unit,
             "current_stock": i.current_stock,
             "reorder_level": i.reorder_level,
-            "unit_cost_inr": i.unit_cost_inr
+            "unit_cost_inr": i.unit_cost_inr,
+            "vendor_id": i.vendor_id
         } for i in ingredients])
 
         # Load Recipes
