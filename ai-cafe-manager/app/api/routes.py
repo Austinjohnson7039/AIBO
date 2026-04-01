@@ -8,14 +8,15 @@ import io
 import os
 import pandas as pd
 
-from app.db.database import get_db
+from app.db.database import get_db, SessionLocal
 from app.db.models import Tenant, Sale, Inventory, Ingredient, Vendor, PurchaseOrder, Recipe
 from app.api.auth import get_current_tenant, get_password_hash, verify_password, create_access_token
 from app.services.stock_engine import stock_engine
 from app.services.forecasting_engine import forecasting_engine
-from app.services.procurement_agent import run_procurement_cycle
+from app.services.procurement_agent import run_procurement_cycle, confirm_purchase_order
 from app.services.menu_agent import menu_agent
 from app.services.excel_parser import fuzzy_map_columns
+from app.services.experimentation_engine import experimentation_engine
 
 router = APIRouter() # Allow FastAPI to handle slashes naturally
 
@@ -76,6 +77,7 @@ class AddGroceryRequest(BaseModel):
     current_stock: float
     reorder_level: float
     unit_cost_inr: float
+    vendor_id: Optional[int] = None
 
 @router.post("/grocery/add/", tags=["Grocery"])
 async def add_grocery(req: AddGroceryRequest, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
@@ -85,6 +87,15 @@ async def add_grocery(req: AddGroceryRequest, tenant: Tenant = Depends(get_curre
 @router.delete("/grocery/remove/", tags=["Grocery"])
 async def remove_grocery(ingredient_name: str, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
     success, msg = stock_engine.remove_grocery_item(db, tenant.id, ingredient_name)
+    return {"status": "success" if success else "error", "message": msg}
+    
+@router.patch("/grocery/update/", tags=["Grocery"])
+async def update_grocery(req: AddGroceryRequest, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    # Re-use AddGroceryRequest schema for updates as well
+    success, msg = stock_engine.add_ingredient(
+        db, tenant.id, req.ingredient_name, req.category, req.unit, 
+        req.current_stock, req.reorder_level, req.unit_cost_inr, req.vendor_id
+    )
     return {"status": "success" if success else "error", "message": msg}
 
 # ─── Analytics & Smart Menu ───────────────────────────────────────────────────
@@ -102,20 +113,20 @@ async def get_smart_menu(tenant: Tenant = Depends(get_current_tenant), db: Sessi
 async def get_trends(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
     return forecasting_engine.get_marketing_insights(db, tenant.id)
 
-_manager_agent = None
-_analyst_agent = None
-_operations_agent = None
+@router.get("/analytics/experimentation/", tags=["Analytics"])
+async def get_experimentation(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    return experimentation_engine.generate_strategy(db, tenant.id)
 
-def get_agents():
-    global _manager_agent, _analyst_agent, _operations_agent
-    if _manager_agent is None:
-        from app.agents.manager import ManagerAgent
-        from app.agents.analyst import AnalystAgent
-        from app.agents.operations import OperationsAgent
-        _manager_agent = ManagerAgent()
-        _analyst_agent = AnalystAgent()
-        _operations_agent = OperationsAgent()
-    return _manager_agent, _analyst_agent, _operations_agent
+# Unused agent imports removed to prevent heavy loading on startup.
+# Lazy-load Orchestrator to prevent FAISS disk I/O and heavy model loading during FastAPI startup
+_orchestrator = None
+
+def get_orchestrator():
+    global _orchestrator
+    if _orchestrator is None:
+        from app.services.orchestrator import Orchestrator
+        _orchestrator = Orchestrator()
+    return _orchestrator
 
 class QueryRequest(BaseModel):
     query: str
@@ -124,39 +135,12 @@ class QueryRequest(BaseModel):
 async def query_ai(req: QueryRequest, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
     """
     Agentic RAG Node: Routes and processes business intelligence and operational queries.
+    BUG FIX: Orchestrator is now lazily-loaded to avoid FAISS disk I/O on
+    startup, ensuring the backend starts instantly.
     """
-    manager_agent, analyst_agent, operations_agent = get_agents()
-    
-    # 1. Classify intent
-    intent = manager_agent.decide_agent(req.query)
-    
-    # 2. Process based on intent
-    if intent == 'analyst':
-        res = analyst_agent.analyze(req.query, tenant.id)
-        return {
-            "response": res["answer"],
-            "evaluation": {"score": 9, "safe": True},
-            "sources": res.get("sources", [])
-        }
-    
-    if intent == 'operations':
-        # Parse the action
-        action_json = operations_agent.parse_action(req.query)
-        # Execute the action
-        result_msg = operations_agent.execute_action(db, tenant.id, action_json)
-        return {
-            "response": result_msg,
-            "evaluation": {"score": 9, "safe": True},
-            "sources": ["Operations Hub"]
-        }
-    
-    # For 'support' and any other intent, use the analyst as a general assistant
-    res = analyst_agent.analyze(req.query, tenant.id)
-    return {
-        "response": res["answer"],
-        "evaluation": {"score": 8, "safe": True},
-        "sources": res.get("sources", [])
-    }
+    orchestrator = get_orchestrator()
+    result = orchestrator.handle(tenant.id, req.query)
+    return result
 
 # ─── Sync (POS Upload) ────────────────────────────────────────────────────────
 
@@ -174,6 +158,7 @@ async def upload_excel_sales(
     try:
         df = pd.read_excel(io.BytesIO(contents))
         clean_df = fuzzy_map_columns(df)
+        # Convert DataFrame to list of dicts for background processing
         records_list = clean_df.to_dict('records')
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -181,19 +166,23 @@ async def upload_excel_sales(
         raise HTTPException(status_code=400, detail="Could not read the uploaded Excel file. Please download the template and try again.")
     
     def _process_excel_bg(t_id: int, records: list):
-        from app.db.database import SessionLocal
         bg_db = SessionLocal()
         try:
             processed = 0
             for row in records:
-                stock_engine.record_sale_and_deduct(bg_db, t_id, str(row['item']), int(row['quantity']), float(row['revenue']))
+                sale_date = row['date'] if 'date' in row and not pd.isna(row['date']) else None
+                stock_engine.record_sale_and_deduct(bg_db, t_id, str(row['item']), int(row['quantity']), float(row['revenue']), sale_date)
                 processed += 1
+            # Run procurement cycle after processing all sales
             run_procurement_cycle(bg_db, t_id)
         finally:
             bg_db.close()
             
     background_tasks.add_task(_process_excel_bg, tenant.id, records_list)
-    return {"status": "success", "message": f"Excel uploaded! Processed {len(records_list)} sales in the background. Agent triggered."}
+    
+    # Return immediately while processing happens in the background
+    num_records = len(records_list)
+    return {"status": "success", "message": f"Excel uploaded! Processed {num_records} sales in the background. Agent triggered."}
 
 @router.get("/sync/template", tags=["Sync"])
 async def download_excel_template():
@@ -265,6 +254,30 @@ async def add_vendor(req: VendorRequest, tenant: Tenant = Depends(get_current_te
 async def trigger_procurement(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
     return run_procurement_cycle(db, tenant.id)
 
+@router.get("/procurement/pending/", tags=["Procurement"])
+async def list_pending_orders(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    # Returns any sent PO that hasn't been confirmed as fulfilled
+    pending = db.query(PurchaseOrder).filter(
+        PurchaseOrder.tenant_id == tenant.id, 
+        PurchaseOrder.status == "AUTO_DISPATCHED"
+    ).all()
+    
+    # Enrich with vendor names
+    results = []
+    for po in pending:
+        vendor = db.query(Vendor).filter(Vendor.id == po.vendor_id).first()
+        results.append({
+            "id": po.id,
+            "vendor_name": vendor.name if vendor else "Unknown",
+            "items": po.items_json,
+            "created_at": po.created_at
+        })
+    return {"pending": results}
+
+@router.post("/procurement/confirm/{po_id}", tags=["Procurement"])
+async def do_confirm_order(po_id: int, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    return confirm_purchase_order(db, tenant.id, po_id)
+
 # ─── Employee Management & Shifts ─────────────────────────────────────────────
 
 from app.db.models import Employee, Attendance, Wastage, Batch
@@ -291,7 +304,16 @@ async def add_staff(req: EmployeeRequest, tenant: Tenant = Depends(get_current_t
 
 @router.post("/staff/clock-in/{employee_id}", tags=["Staff"])
 async def clock_in(employee_id: int, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
-    # Simple clock in
+    # 1. Protection Against Infinite Clock-Ins Loop
+    last_att = db.query(Attendance).filter(
+        Attendance.tenant_id == tenant.id,
+        Attendance.employee_id == employee_id
+    ).order_by(Attendance.id.desc()).first()
+
+    if last_att and last_att.check_in and not last_att.check_out:
+        return {"status": "error", "message": "Employee is already actively clocked in. Please clock out first."}
+
+    # 2. Simple clock in
     new_att = Attendance(
         tenant_id=tenant.id,
         employee_id=employee_id,
@@ -323,7 +345,11 @@ async def get_salaries(tenant: Tenant = Depends(get_current_tenant), db: Session
     employees = db.query(Employee).filter(Employee.tenant_id == tenant.id).all()
     salaries = []
     for e in employees:
-        atts = db.query(Attendance).filter(Attendance.employee_id == e.id).all()
+        # BUG FIX: Was missing tenant_id filter — caused cross-tenant attendance data leakage
+        atts = db.query(Attendance).filter(
+            Attendance.employee_id == e.id,
+            Attendance.tenant_id == tenant.id  # CRITICAL: Scoped to tenant
+        ).all()
         total_hrs = sum(a.total_hours for a in atts)
         salaries.append({
             "employee_id": e.id,
@@ -349,7 +375,7 @@ async def add_wastage(req: WastageRequest, tenant: Tenant = Depends(get_current_
     # Optional logic: Deduct from ingredient stock
     ing = db.query(Ingredient).filter(Ingredient.tenant_id == tenant.id, Ingredient.ingredient_name == req.item_name).first()
     if ing:
-        ing.current_stock -= req.quantity
+        ing.current_stock = max(0.0, float(ing.current_stock) - float(req.quantity))
     
     db.add(w)
     db.commit()
@@ -362,14 +388,20 @@ async def get_wastage(tenant: Tenant = Depends(get_current_tenant), db: Session 
 
 @router.get("/analytics/staffing-recommendation/", tags=["Analytics"])
 async def get_staffing_recs(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
-    # AI logic representing the upgrade
-    sales = db.query(Sale).filter(Sale.tenant_id == tenant.id).all()
-    # Basic logic to recommend reducing staff if we don't have many recent sales
-    num_sales = len(sales)
+    from datetime import timedelta
+    # BUG FIX: Was using ALL TIME sales count (len(sales) could be 10,000+).
+    # Now uses recent 24h sales for an accurate, real-time recommendation.
+    cutoff = datetime.utcnow() - timedelta(hours=24)
+    recent_sales = db.query(Sale).filter(
+        Sale.tenant_id == tenant.id,
+        Sale.sale_date >= cutoff
+    ).count()
     
-    if num_sales < 10:
-        alert = "Reduce 1 staff during slow hours"
+    if recent_sales < 5:
+        alert = f"Traffic is very low ({recent_sales} sales in 24h). Consider reducing 1 staff member during slow hours to protect margins."
+    elif recent_sales < 20:
+        alert = f"Moderate traffic ({recent_sales} sales in 24h). Current staffing is adequate."
     else:
-        alert = "Traffic is normal. Current staffing is optimal."
+        alert = f"High traffic detected ({recent_sales} sales in 24h). Consider calling in an extra staff member."
         
-    return {"recommendation": alert}
+    return {"recommendation": alert, "recent_sales_24h": recent_sales}

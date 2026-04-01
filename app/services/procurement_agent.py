@@ -96,3 +96,42 @@ def run_procurement_cycle(db: Session, tenant_id: int):
     except Exception as e:
         db.rollback()
         return {"status": "error", "message": str(e)}
+
+def confirm_purchase_order(db: Session, tenant_id: int, po_id: int):
+    """
+    Finalizes a pending Auto-Purchase, adding items to stock.
+    """
+    try:
+        po = db.query(PurchaseOrder).filter(
+            PurchaseOrder.id == po_id, 
+            PurchaseOrder.tenant_id == tenant_id
+        ).first()
+        
+        if not po or po.status != "AUTO_DISPATCHED":
+            return {"status": "error", "message": "Pending Purchase Order not found."}
+            
+        from app.services.stock_engine import stock_engine
+        import json
+        
+        items = json.loads(po.items_json)
+        updated_items = []
+        
+        for item in items:
+            name = item['name']
+            qty = float(item['qty'])
+            
+            # Use standard restock logic
+            stock_engine.restock_item(db, tenant_id, name, qty)
+            updated_items.append(f"{qty} {item['unit']} of {name}")
+            
+        po.status = "FULFILLED"
+        db.commit()
+        
+        return {
+            "status": "success", 
+            "message": f"Inventory updated! Added: {', '.join(updated_items)}",
+            "po_id": po_id
+        }
+    except Exception as e:
+        db.rollback()
+        return {"status": "error", "message": f"Confirmation failed: {str(e)}"}

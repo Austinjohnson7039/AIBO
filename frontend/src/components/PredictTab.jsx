@@ -154,7 +154,7 @@ export default function PredictTab() {
                   <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4 }}>{ins.rec}</div>
                 </div>
                 <div className="mono" style={{ fontSize: 16, fontWeight: 800, color: ins.momentum > 0 ? 'var(--success)' : 'var(--warning)', flexShrink: 0 }}>
-                  {ins.momentum > 0 ? '+' : ''}{ins.momentum?.toFixed(1)}%
+                  {Number(ins.momentum || 0) > 0 ? '+' : ''}{Number(ins.momentum || 0).toFixed(1)}%
                 </div>
               </div>
             ))}

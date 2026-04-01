@@ -13,7 +13,7 @@ from app.db.models import Tenant, Sale, Inventory, Ingredient, Vendor, PurchaseO
 from app.api.auth import get_current_tenant, get_password_hash, verify_password, create_access_token
 from app.services.stock_engine import stock_engine
 from app.services.forecasting_engine import forecasting_engine
-from app.services.procurement_agent import run_procurement_cycle
+from app.services.procurement_agent import run_procurement_cycle, confirm_purchase_order
 from app.services.menu_agent import menu_agent
 from app.services.excel_parser import fuzzy_map_columns
 from app.services.experimentation_engine import experimentation_engine
@@ -253,6 +253,30 @@ async def add_vendor(req: VendorRequest, tenant: Tenant = Depends(get_current_te
 @router.post("/procurement/trigger", tags=["Procurement"])
 async def trigger_procurement(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
     return run_procurement_cycle(db, tenant.id)
+
+@router.get("/procurement/pending/", tags=["Procurement"])
+async def list_pending_orders(tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    # Returns any sent PO that hasn't been confirmed as fulfilled
+    pending = db.query(PurchaseOrder).filter(
+        PurchaseOrder.tenant_id == tenant.id, 
+        PurchaseOrder.status == "AUTO_DISPATCHED"
+    ).all()
+    
+    # Enrich with vendor names
+    results = []
+    for po in pending:
+        vendor = db.query(Vendor).filter(Vendor.id == po.vendor_id).first()
+        results.append({
+            "id": po.id,
+            "vendor_name": vendor.name if vendor else "Unknown",
+            "items": po.items_json,
+            "created_at": po.created_at
+        })
+    return {"pending": results}
+
+@router.post("/procurement/confirm/{po_id}", tags=["Procurement"])
+async def do_confirm_order(po_id: int, tenant: Tenant = Depends(get_current_tenant), db: Session = Depends(get_db)):
+    return confirm_purchase_order(db, tenant.id, po_id)
 
 # ─── Employee Management & Shifts ─────────────────────────────────────────────
 

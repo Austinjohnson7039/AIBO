@@ -1,8 +1,11 @@
+import logging
 import pandas as pd
 from datetime import datetime, timedelta
 from sqlalchemy import select, update, delete
 from sqlalchemy.orm import Session
 from app.db.models import Ingredient, Recipe, Sale, Inventory, Tenant
+
+logger = logging.getLogger(__name__)
 
 class StockEngine:
     def __init__(self):
@@ -50,7 +53,7 @@ class StockEngine:
 
         return grocery_df, recipes_df, sales_df, inv_df
 
-    def record_sale_and_deduct(self, db: Session, tenant_id: int, item_name: str, quantity: int, revenue: float, sale_date=None):
+    def record_sale_and_deduct(self, db: Session, tenant_id: int, item_name: str, quantity: int, revenue: float, sale_date: datetime = None):
         """Records a sale and deducts ingredients for a specific tenant."""
         try:
             # 1. Record Sale
@@ -88,7 +91,29 @@ class StockEngine:
             db.commit()
         except Exception as e:
             db.rollback()
-            print(f"Deduction error: {e}")
+            # BUG FIX (BUG 8): Was using print() which is invisible in production logs
+            logger.error(f"Sale deduction error for tenant {tenant_id}, item '{item_name}': {e}")
+
+    def add_ingredient(self, db: Session, tenant_id: int, name: str, category: str, unit: str, stock: float, reorder: float, unit_cost: float = 0.0, vendor_id: int = None):
+        """Adds or updates a raw ingredient in the tenant's registry."""
+        ing = db.query(Ingredient).filter(Ingredient.tenant_id == tenant_id, Ingredient.ingredient_name == name).first()
+        if ing:
+            ing.category = category
+            ing.unit = unit
+            ing.current_stock = stock
+            ing.reorder_level = reorder
+            ing.unit_cost_inr = unit_cost
+            if vendor_id is not None:
+                ing.vendor_id = vendor_id
+        else:
+            ing = Ingredient(
+                tenant_id=tenant_id, ingredient_name=name, category=category, unit=unit, 
+                current_stock=stock, reorder_level=reorder, unit_cost_inr=unit_cost, 
+                vendor_id=vendor_id
+            )
+            db.add(ing)
+        db.commit()
+        return True, f"Updated {name}."
 
     def restock_item(self, db: Session, tenant_id: int, ingredient_name: str, added_amount: float):
         """Adds stock for a tenant's ingredient."""
@@ -263,7 +288,8 @@ class StockEngine:
                     "current_stock": row["current_stock"],
                     "reorder_level": row["reorder_level"],
                     "unit": row["unit"],
-                    "unit_cost_inr": row["unit_cost_inr"]
+                    "unit_cost_inr": row["unit_cost_inr"],
+                    "vendor_id": row.get("vendor_id")
                 })
 
         return {

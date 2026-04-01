@@ -78,6 +78,8 @@ export const getForecast = () => request('GET', '/analytics/forecast/');
 export const getTrends = () => request('GET', '/analytics/trends/');
 export const getVendors = () => request('GET', '/vendors/');
 export const addVendor = (data) => request('POST', '/vendors/add/', data);
+export const listPendingOrders = () => request('GET', '/procurement/pending/');
+export const confirmOrder = (id) => request('POST', `/procurement/confirm/${id}`, {});
 export const triggerProcurement = () => request('POST', '/procurement/trigger', {});
 
 // ── Sync ─────────────────────────────────────────────────────────────────────

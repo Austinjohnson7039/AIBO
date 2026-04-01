@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getDashboard, getVendors, addVendor, restockGrocery, addGrocery, removeGrocery } from '../api.js';
+import { getDashboard, getVendors, addVendor, restockGrocery, addGrocery, removeGrocery, listPendingOrders, confirmOrder, updateGrocery } from '../api.js';
 import CafeLoader from './CafeLoader.jsx';
 
 const CATEGORIES = ['Dairy', 'Coffee Beans', 'Syrups', 'Bakery', 'Packaging', 'Spices', 'Beverages', 'Other'];
@@ -12,6 +12,8 @@ export default function GroceryTab() {
   const [restockInputs, setRestockInputs] = useState({});
   const [msg, setMsg] = useState('');
   const [expandedItem, setExpandedItem] = useState(null);
+  const [pending, setPending] = useState([]);
+  const [confirming, setConfirming] = useState(false);
 
   const [newItem, setNewItem] = useState({
     ingredient_name: '', category: 'Dairy', unit: 'kg',
@@ -21,13 +23,20 @@ export default function GroceryTab() {
   const [newVendor, setNewVendor] = useState({ name: '', contact_name: '', whatsapp_number: '', category: 'Dairy' });
 
   useEffect(() => {
-    Promise.all([getDashboard(), getVendors()])
-      .then(([d, v]) => { setData(d); setVendors(v.vendors || []); })
+    Promise.all([getDashboard(), getVendors(), listPendingOrders()])
+      .then(([d, v, p]) => { 
+        setData(d); 
+        setVendors(v.vendors || []); 
+        setPending(p.pending || []);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const refresh = () => getDashboard().then(setData).catch(() => {});
+  const refresh = () => {
+    getDashboard().then(setData).catch(() => {});
+    listPendingOrders().then(p => setPending(p.pending || [])).catch(() => {});
+  };
 
   const handleRestock = async (name) => {
     const amt = parseFloat(restockInputs[name] || 0);
@@ -99,6 +108,17 @@ export default function GroceryTab() {
     setTimeout(() => setMsg(''), 3000);
   };
 
+  const handleConfirmOrder = async (id) => {
+    setConfirming(true);
+    try {
+      const res = await confirmOrder(id);
+      setMsg(`✓ ${res.message}`);
+      refresh();
+    } catch (e) { setMsg(`✕ ${e.message}`); }
+    setConfirming(false);
+    setTimeout(() => setMsg(''), 4000);
+  };
+
   if (loading) return <CafeLoader />;
 
   const inventory = data?.inventory || [];
@@ -125,6 +145,40 @@ export default function GroceryTab() {
         <div className={`badge ${msg.startsWith('✓') ? 'badge-success' : 'badge-danger'}`}
           style={{ width: '100%', padding: '10px 14px', marginBottom: 16, justifyContent: 'flex-start', fontSize: 12 }}>
           {msg}
+        </div>
+      )}
+
+      {/* Pending Orders Section */}
+      {pending.length > 0 && (
+        <div className="card" style={{ marginBottom: 20, border: '1px dashed var(--warning)', background: 'rgba(255, 193, 7, 0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+            <span style={{ fontSize: 20 }}>🚚</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--text-primary)' }}>Pending Auto-Procurements</div>
+              <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>These orders were recently dispatched via WhatsApp. Click confirm to add them to stock.</div>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {pending.map(po => (
+              <div key={po.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: 'var(--bg-card)', borderRadius: 8, border: '1px solid var(--border-subtle)' }}>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700 }}>PO #{po.id} - Source: {po.vendor_name}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 2 }}>
+                    Sent on {po.created_at ? new Date(po.created_at).toLocaleDateString() : 'N/A'} at {po.created_at ? new Date(po.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+                  </div>
+                </div>
+                <button 
+                  className="btn btn-primary btn-sm" 
+                  onClick={() => handleConfirmOrder(po.id)}
+                  disabled={confirming}
+                  style={{ padding: '6px 12px' }}
+                >
+                  {confirming ? 'Syncing...' : 'Confirm Delivery'}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -260,7 +314,7 @@ export default function GroceryTab() {
                   </tr>
                   {expandedItem === item.ingredient_name && (
                     <tr style={{ background: 'var(--bg-elevated)' }}>
-                      <td colSpan="6" style={{ padding: '16px 24px' }}>
+                      <td colSpan="7" style={{ padding: '16px 24px' }}>
                         <div className="grid-2" style={{ gap: 32 }}>
                           <div>
                             <h4 style={{ fontSize: 11, textTransform: 'uppercase', color: 'var(--text-dim)', marginBottom: 12 }}>Component Intelligence</h4>

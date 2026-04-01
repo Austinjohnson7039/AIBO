@@ -21,11 +21,9 @@ const CustomTooltip = ({ active, payload, label }) => {
 export default function DashboardTab() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [aiQuery, setAiQuery] = useState('')
-  const [aiLoading, setAiLoading] = useState(false)
-  const [aiAnswer, setAiAnswer] = useState('')
-  const fileInputRef = useRef(null)
   const [msg, setMsg] = useState('')
+  const [expandedKpi, setExpandedKpi] = useState(null) // 'revenue', 'items', 'margin' or null
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     getDashboard()
@@ -71,27 +69,128 @@ export default function DashboardTab() {
 
       {/* ── KPIs ── */}
       <div className="kpi-grid">
-        <div className="kpi-card">
+        <div className={`kpi-card ${expandedKpi === 'revenue' ? 'active' : ''}`} 
+             onClick={() => setExpandedKpi(expandedKpi === 'revenue' ? null : 'revenue')}
+             style={{ cursor: 'pointer', transition: 'all 0.2s', border: expandedKpi === 'revenue' ? '1px solid var(--primary)' : '1px solid transparent' }}>
           <div className="kpi-icon" style={{ background: 'var(--primary-dim)' }}>☕</div>
-          <div className="card-label">Today's Revenue</div>
-          <div className="card-value accent">₹{(kpis.today_rev || 0).toLocaleString('en-IN')}</div>
+          <div className="card-label">Revenue Overview 🔍</div>
+          <div className="card-value accent">₹{(kpis.total_rev || 0).toLocaleString('en-IN')}</div>
         </div>
-        <div className="kpi-card">
-          <div className="kpi-icon" style={{ background: 'var(--success-dim)' }}>💰</div>
-          <div className="card-label">Total Revenue</div>
-          <div className="card-value">₹{(kpis.total_rev || 0).toLocaleString('en-IN')}</div>
-        </div>
-        <div className="kpi-card">
+        <div className={`kpi-card ${expandedKpi === 'items' ? 'active' : ''}`}
+             onClick={() => setExpandedKpi(expandedKpi === 'items' ? null : 'items')}
+             style={{ cursor: 'pointer', transition: 'all 0.2s', border: expandedKpi === 'items' ? '1px solid var(--accent)' : '1px solid transparent' }}>
           <div className="kpi-icon" style={{ background: 'var(--accent-dim)' }}>📦</div>
-          <div className="card-label">Items Sold</div>
+          <div className="card-label">Items Sold 🔍</div>
           <div className="card-value">{(kpis.total_items || 0).toLocaleString('en-IN')}</div>
         </div>
-        <div className="kpi-card">
+        <div className={`kpi-card ${expandedKpi === 'margin' ? 'active' : ''}`}
+             onClick={() => setExpandedKpi(expandedKpi === 'margin' ? null : 'margin')}
+             style={{ cursor: 'pointer', transition: 'all 0.2s', border: expandedKpi === 'margin' ? '1px solid var(--warning)' : '1px solid transparent' }}>
           <div className="kpi-icon" style={{ background: 'var(--warning-dim)' }}>📈</div>
-          <div className="card-label">Gross Margin</div>
+          <div className="card-label">Gross Margin 🔍</div>
           <div className="card-value">{advanced.gross_margin_pct || 0}%</div>
         </div>
+        <div className="kpi-card" style={{ opacity: 0.8 }}>
+          <div className="kpi-icon" style={{ background: 'var(--success-dim)' }}>💰</div>
+          <div className="card-label">Today's Revenue</div>
+          <div className="card-value" style={{ color: 'var(--success)' }}>₹{(kpis.today_rev || 0).toLocaleString('en-IN')}</div>
+        </div>
       </div>
+
+      {/* ── Drill-down Detail View ── */}
+      {expandedKpi && (
+        <div className="card fade-in" style={{ marginBottom: 20, border: '1px solid var(--border-strong)', background: 'var(--bg-card)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h3 style={{ margin: 0, fontSize: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+               {expandedKpi === 'revenue' ? '💰 Revenue Deep Dive' : expandedKpi === 'items' ? '📦 Item Breakdown' : '📉 Profitability Analysis'}
+            </h3>
+            <button className="btn btn-ghost" onClick={() => setExpandedKpi(null)} style={{ padding: '4px 8px' }}>Close</button>
+          </div>
+
+          <div style={{ overflowX: 'auto' }}>
+            {expandedKpi === 'revenue' && (
+              <div className="grid-3" style={{ gap: 20 }}>
+                <div>
+                  <h4 style={{ fontSize: 12, color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: 10 }}>Daily (Recent)</h4>
+                  <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+                    <thead><tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border-subtle)' }}><th style={{ padding: 8 }}>Date</th><th style={{ padding: 8 }}>Rev</th></tr></thead>
+                    <tbody>
+                      {advanced.daily_sales?.slice(-5).reverse().map((r, i) => (
+                        <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                          <td style={{ padding: 8 }}>{r.date}</td>
+                          <td style={{ padding: 8, fontWeight: 600 }}>₹{(Number(r.revenue) || 0).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div>
+                  <h4 style={{ fontSize: 12, color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: 10 }}>Weekly</h4>
+                  <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+                    <thead><tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border-subtle)' }}><th style={{ padding: 8 }}>Week Start</th><th style={{ padding: 8 }}>Rev</th></tr></thead>
+                    <tbody>
+                      {advanced.weekly_sales?.slice(-5).reverse().map((r, i) => (
+                        <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                          <td style={{ padding: 8 }}>{r.week}</td>
+                          <td style={{ padding: 8, fontWeight: 600 }}>₹{(Number(r.revenue) || 0).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div>
+                  <h4 style={{ fontSize: 12, color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: 10 }}>Monthly</h4>
+                  <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+                    <thead><tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border-subtle)' }}><th style={{ padding: 8 }}>Month</th><th style={{ padding: 8 }}>Rev</th></tr></thead>
+                    <tbody>
+                      {advanced.monthly_sales?.slice(-5).reverse().map((r, i) => (
+                        <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                          <td style={{ padding: 8 }}>{r.month}</td>
+                          <td style={{ padding: 8, fontWeight: 600 }}>₹{(Number(r.revenue) || 0).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            
+            {expandedKpi === 'items' && (
+              <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+                    <thead><tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border-subtle)' }}>
+                      <th style={{ padding: 12 }}>Product Name</th>
+                      <th style={{ padding: 12 }}>Total Revenue Generated</th>
+                    </tr></thead>
+                    <tbody>
+                      {Object.entries(kpis.top_5 || {}).map(([name, rev], i) => (
+                        <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                          <td style={{ padding: 12, fontWeight: 500 }}>{name}</td>
+                          <td style={{ padding: 12, fontWeight: 700, color: 'var(--primary)' }}>₹{(Number(rev) || 0).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+              </table>
+            )}
+
+            {expandedKpi === 'margin' && (
+              <div>
+                <p style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 16 }}>
+                  Gross Margin reflects Earnings after Cost of Goods Sold (COGS). 
+                  Target: <strong>&gt; 65%</strong> for café stability.
+                </p>
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  {advanced.category_performance?.map((c, i) => (
+                    <div key={i} className="card" style={{ flex: '1 1 150px', padding: 12, textAlign: 'center', background: 'var(--bg-elevated)' }}>
+                      <div className="card-label" style={{ fontSize: 10 }}>{c.category}</div>
+                      <div style={{ fontSize: 18, fontWeight: 700 }}>₹{(Number(c.revenue) || 0).toLocaleString()}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Alerts ── */}
       {alerts.length > 0 && (
@@ -198,7 +297,7 @@ export default function DashboardTab() {
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie data={advanced.category_performance} dataKey="revenue" nameKey="category" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={2}>
-                    {advanced.category_performance.map((entry, index) => (
+                    {advanced.category_performance?.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
