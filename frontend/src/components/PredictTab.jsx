@@ -80,7 +80,7 @@ export default function PredictTab() {
                       {item.ingredient_name} {expandedForecast === item.ingredient_name ? '🔼' : '🔽'}
                     </td>
                     <td className="mono" style={{ color: 'var(--primary)', fontWeight: 700 }}>{item.to_buy} {item.unit}</td>
-                    <td className="mono" style={{ color: 'var(--success)', paddingRight: 16 }}>₹{(item.estimated_cost || 0).toLocaleString('en-IN')}</td>
+                    <td className="mono" style={{ color: 'var(--success)', paddingRight: 16 }}>₹{Number(item.estimated_cost || 0).toLocaleString('en-IN')}</td>
                   </tr>
                   {expandedForecast === item.ingredient_name && (
                     <tr style={{ background: 'var(--bg-elevated)' }}>

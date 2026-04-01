@@ -19,8 +19,11 @@ const CustomTooltip = ({ active, payload, label }) => {
 }
 
 export default function DashboardTab() {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [msg, setMsg] = useState('')
   const [expandedKpi, setExpandedKpi] = useState(null) // 'revenue', 'items', 'margin' or null
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     getDashboard()
@@ -115,7 +118,7 @@ export default function DashboardTab() {
                       {advanced.daily_sales?.slice(-5).reverse().map((r, i) => (
                         <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                           <td style={{ padding: 8 }}>{r.date}</td>
-                          <td style={{ padding: 8, fontWeight: 600 }}>₹{r.revenue.toLocaleString()}</td>
+                          <td style={{ padding: 8, fontWeight: 600 }}>₹{(Number(r.revenue) || 0).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -129,7 +132,7 @@ export default function DashboardTab() {
                       {advanced.weekly_sales?.slice(-5).reverse().map((r, i) => (
                         <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                           <td style={{ padding: 8 }}>{r.week}</td>
-                          <td style={{ padding: 8, fontWeight: 600 }}>₹{r.revenue.toLocaleString()}</td>
+                          <td style={{ padding: 8, fontWeight: 600 }}>₹{(Number(r.revenue) || 0).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -143,7 +146,7 @@ export default function DashboardTab() {
                       {advanced.monthly_sales?.slice(-5).reverse().map((r, i) => (
                         <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                           <td style={{ padding: 8 }}>{r.month}</td>
-                          <td style={{ padding: 8, fontWeight: 600 }}>₹{r.revenue.toLocaleString()}</td>
+                          <td style={{ padding: 8, fontWeight: 600 }}>₹{(Number(r.revenue) || 0).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -162,7 +165,7 @@ export default function DashboardTab() {
                       {Object.entries(kpis.top_5 || {}).map(([name, rev], i) => (
                         <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                           <td style={{ padding: 12, fontWeight: 500 }}>{name}</td>
-                          <td style={{ padding: 12, fontWeight: 700, color: 'var(--primary)' }}>₹{rev.toLocaleString()}</td>
+                          <td style={{ padding: 12, fontWeight: 700, color: 'var(--primary)' }}>₹{(Number(rev) || 0).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -179,7 +182,7 @@ export default function DashboardTab() {
                   {advanced.category_performance?.map((c, i) => (
                     <div key={i} className="card" style={{ flex: '1 1 150px', padding: 12, textAlign: 'center', background: 'var(--bg-elevated)' }}>
                       <div className="card-label" style={{ fontSize: 10 }}>{c.category}</div>
-                      <div style={{ fontSize: 18, fontWeight: 700 }}>₹{c.revenue.toLocaleString()}</div>
+                      <div style={{ fontSize: 18, fontWeight: 700 }}>₹{(Number(c.revenue) || 0).toLocaleString()}</div>
                     </div>
                   ))}
                 </div>
@@ -294,7 +297,7 @@ export default function DashboardTab() {
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie data={advanced.category_performance} dataKey="revenue" nameKey="category" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={2}>
-                    {advanced.category_performance.map((entry, index) => (
+                    {advanced.category_performance?.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
